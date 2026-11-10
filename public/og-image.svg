@@ -1,32 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a0f05"/>
-      <stop offset="50%" stop-color="#451a03"/>
-      <stop offset="100%" stop-color="#1a0f05"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#d97706"/>
-      <stop offset="100%" stop-color="#f59e0b"/>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#3a1b09"/>
+      <stop offset="60%" stop-color="#1d0f06"/>
+      <stop offset="100%" stop-color="#120a05"/>
+    </radialGradient>
+    <radialGradient id="medal" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="60%" stop-color="#e0a43a"/>
+      <stop offset="100%" stop-color="#b7791f"/>
+    </radialGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#deb35c" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#deb35c" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#deb35c" stop-opacity="0"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <!-- Decorative border -->
-  <rect x="20" y="20" width="1160" height="590" rx="16" fill="none" stroke="url(#accent)" stroke-width="2" opacity="0.4"/>
-  <rect x="30" y="30" width="1140" height="570" rx="12" fill="none" stroke="url(#accent)" stroke-width="1" opacity="0.2"/>
-  <!-- OM symbol -->
-  <text x="600" y="200" font-size="100" text-anchor="middle" fill="#d97706" opacity="0.15" font-family="serif">ॐ</text>
-  <!-- Title -->
-  <text x="600" y="300" font-size="64" text-anchor="middle" fill="#fde68a" font-family="serif" font-weight="bold">श्री राम प्रश्नावली</text>
-  <text x="600" y="360" font-size="36" text-anchor="middle" fill="#f59e0b" font-family="sans-serif">Ram Prashnavali</text>
-  <!-- Subtitle -->
-  <text x="600" y="420" font-size="24" text-anchor="middle" fill="#fbbf24" font-family="serif" opacity="0.8">रामचरितमानस · गोस्वामी तुलसीदास</text>
-  <!-- Decorative corners -->
-  <text x="50" y="70" font-size="24" fill="#d97706" opacity="0.3" font-family="serif">❁</text>
-  <text x="1130" y="70" font-size="24" fill="#d97706" opacity="0.3" font-family="serif">❁</text>
-  <text x="50" y="590" font-size="24" fill="#d97706" opacity="0.3" font-family="serif">❁</text>
-  <text x="1130" y="590" font-size="24" fill="#d97706" opacity="0.3" font-family="serif">❁</text>
-  <!-- Bottom line -->
-  <line x1="200" y1="470" x2="1000" y2="470" stroke="#d97706" stroke-width="1" opacity="0.3"/>
-  <text x="600" y="510" font-size="20" text-anchor="middle" fill="#92400e" font-family="sans-serif">ramcharitmanas.vercel.app</text>
+  <rect x="24" y="24" width="1152" height="582" rx="18" fill="none" stroke="#deb35c" stroke-width="2" opacity="0.35"/>
+  <rect x="36" y="36" width="1128" height="558" rx="12" fill="none" stroke="#deb35c" stroke-width="1" opacity="0.15"/>
+  <g font-family="Georgia, serif" font-size="26" fill="#deb35c" opacity="0.4">
+    <text x="58" y="78">❁</text><text x="1118" y="78">❁</text>
+    <text x="58" y="578">❁</text><text x="1118" y="578">❁</text>
+  </g>
+  <circle cx="600" cy="168" r="70" fill="url(#medal)"/>
+  <circle cx="600" cy="168" r="78" fill="none" stroke="#deb35c" stroke-width="2" opacity="0.45"/>
+  <text x="600" y="198" text-anchor="middle" font-size="84" fill="#3a1606" font-family="'Nirmala UI', 'Noto Sans Devanagari', Mangal, serif">ॐ</text>
+  <text x="600" y="328" text-anchor="middle" font-size="78" font-weight="bold" fill="#f2e4cb" font-family="'Nirmala UI', 'Noto Sans Devanagari', Mangal, serif">श्री राम प्रश्नावली</text>
+  <text x="600" y="382" text-anchor="middle" font-size="30" letter-spacing="3" fill="#deb35c" font-family="'Segoe UI', Arial, sans-serif">SHRI RAM PRASHNAVALI · RAM SHALAKA</text>
+  <rect x="300" y="420" width="600" height="2" fill="url(#rule)"/>
+  <text x="600" y="476" text-anchor="middle" font-size="30" fill="#d8bf98" font-family="'Nirmala UI', 'Noto Sans Devanagari', Mangal, serif">रामचरितमानस की राम शलाका से अपने प्रश्न का उत्तर पाएं</text>
+  <text x="600" y="556" text-anchor="middle" font-size="22" fill="#a98b64" font-family="'Segoe UI', Arial, sans-serif">ramcharitmanas.vercel.app</text>
 </svg>

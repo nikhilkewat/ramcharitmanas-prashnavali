@@ -2,38 +2,29 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import PrashnavaliGrid from '@/components/PrashnavaliGrid';
 import ChaupaiCard from '@/components/ChaupaiCard';
 import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali';
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
+import { saveHistory, useHistory } from '@/lib/history';
+import { WhatsAppIcon } from '@/components/icons';
+import {
+  CalendarDays, Check, HandHeart, ImageDown, Link2, Loader2, Printer,
+  RotateCcw, Send, Sparkles, Volume2, VolumeX, X, type LucideIcon,
+} from 'lucide-react';
 
 const REVEAL_DELAY = 120;
-const HISTORY_KEY = 'ram-prashnavali-history';
-const MAX_HISTORY = 20;
 
-interface HistoryItem {
-  cell: number;
-  question: string;
-  chaupaiHindi: string;
-  chaupaiMeaning: string;
-  result: string;
-  timestamp: number;
-}
-
-function loadHistory(): HistoryItem[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch { return []; }
-}
-
-function saveHistory(item: HistoryItem) {
-  const history = loadHistory();
-  history.unshift(item);
-  if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export default function Home() {
@@ -46,14 +37,21 @@ export default function Home() {
   const [revealedCells, setRevealedCells] = useState<number[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const history = useHistory();
 
   const resultRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
+  // Pending start of a reading ("Ask for Me" delay, shared-link autoplay).
+  const startRef = useRef<NodeJS.Timeout | null>(null);
   const [isRandom, setIsRandom] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
 
-  const animateReveal = useCallback((cells: number[], prashResult: PrashnavaliResult) => {
+  // All inputs are passed explicitly so the timer callbacks never read stale state.
+  const animateReveal = useCallback((prashResult: PrashnavaliResult, askedQuestion: string) => {
+    if (animationRef.current) clearTimeout(animationRef.current);
+    const cells = prashResult.highlightedCells;
     setIsAnimating(true);
     setRevealedCells([]);
     setShowResult(false);
@@ -61,44 +59,51 @@ export default function Home() {
 
     const tick = () => {
       if (i < cells.length) {
-        setRevealedCells((prev) => [...prev, cells[i]]);
+        const cellIndex = cells[i];
         i++;
+        setRevealedCells((prev) => [...prev, cellIndex]);
         animationRef.current = setTimeout(tick, REVEAL_DELAY);
       } else {
         setIsAnimating(false);
         setShowResult(true);
         setResult(prashResult);
-        const cellParam = new URLSearchParams(window.location.search).get('cell');
-        const cellIndex = cellParam ? parseInt(cellParam, 10) : -1;
         saveHistory({
-          cell: cellIndex !== -1 ? cellIndex : 0,
-          question: question,
+          cell: prashResult.selectedPosition,
+          question: askedQuestion,
           chaupaiHindi: prashResult.chaupai.hindi,
           chaupaiMeaning: prashResult.chaupai.meaning,
           result: prashResult.chaupai.resultLabelEn,
           timestamp: Date.now(),
         });
-        setHistory(loadHistory());
       }
     };
 
     animationRef.current = setTimeout(tick, REVEAL_DELAY);
   }, []);
 
-  const handleLetterSelect = (row: number, col: number) => {
-    if (isAnimating) return;
-    setQuestion(pendingQuestion);
+  const runPrashna = useCallback((row: number, col: number, askedQuestion: string) => {
+    const q = askedQuestion.trim();
+    setIsRandom(false);
+    setQuestion(q);
+    setPendingQuestion(q);
     const prashResult = generatePrashnavaliResult(row, col);
-    animateReveal(prashResult.highlightedCells, prashResult);
+    animateReveal(prashResult, q);
 
     const params = new URLSearchParams(window.location.search);
     params.set('cell', String(prashResult.selectedPosition));
-    if (pendingQuestion.trim()) params.set('q', pendingQuestion.trim());
+    if (q) params.set('q', q);
+    else params.delete('q');
     router.replace('?' + params.toString(), { scroll: false });
+  }, [animateReveal, router]);
+
+  const handleLetterSelect = (row: number, col: number) => {
+    if (isAnimating) return;
+    runPrashna(row, col, pendingQuestion);
   };
 
   const handleReset = () => {
     if (animationRef.current) clearTimeout(animationRef.current);
+    if (startRef.current) clearTimeout(startRef.current);
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setResult(null);
@@ -139,11 +144,14 @@ export default function Home() {
     setQuestion('');
     setPendingQuestion('');
     setIsRandom(true);
+    setShowPanel(false);
     const randomPos = Math.floor(Math.random() * TOTAL_CELLS);
     const row = Math.floor(randomPos / GRID_SIZE);
     const col = randomPos % GRID_SIZE;
-    setTimeout(() => {
-      handleLetterSelect(row, col);
+    if (startRef.current) clearTimeout(startRef.current);
+    startRef.current = setTimeout(() => {
+      startRef.current = null;
+      runPrashna(row, col, '');
     }, 1500);
   };
 
@@ -163,8 +171,6 @@ export default function Home() {
     setIsSpeaking(true);
   };
 
-  const [isDownloading, setIsDownloading] = useState(false);
-
   const handleDownloadImage = async () => {
     if (!result || isDownloading) return;
     setIsDownloading(true);
@@ -179,8 +185,12 @@ export default function Home() {
   };
 
   const handlePrint = () => {
+    if (!result) return;
     const printWindow = window.open('', '_blank');
-    if (!printWindow || !result) return;
+    if (!printWindow) return;
+    const c = result.chaupai;
+    const e = escapeHtml;
+    const badgeClass = c.result === 'शुभ' ? 'auspicious' : c.result === 'अशुभ' ? 'caution' : 'neutral';
     printWindow.document.write(`<!DOCTYPE html>
 <html><head><title>Ram Prashnavali</title>
 <style>
@@ -202,20 +212,20 @@ export default function Home() {
   .footer { text-align: center; margin-top: 32px; padding-top: 16px; border-top: 1px solid #e67e22; font-size: 12px; color: #92400e; }
 </style></head><body>
 <div class="header">
-  <h1>🙏 श्री राम प्रश्नावली</h1>
+  <h1>॥ श्री राम प्रश्नावली ॥</h1>
   <p>Ram Prashnavali — Shri Ram Shalaka</p>
 </div>
-<div class="result-badge"><span class="${result.chaupai.resultLabelEn.includes('Auspicious') ? 'auspicious' : result.chaupai.resultLabelEn.includes('Caution') ? 'caution' : 'neutral'}">${result.chaupai.resultLabel} · ${result.chaupai.resultLabelEn}</span></div>
-${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16px 0;">"${question}"</p>` : ''}
+<div class="result-badge"><span class="${badgeClass}">${e(c.resultLabel)} · ${e(c.resultLabelEn)}</span></div>
+${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16px 0;">"${e(question)}"</p>` : ''}
 <div class="chaupai">
-  <div class="hindi">${result.chaupai.hindi}</div>
-  <div class="meaning">${result.chaupai.meaning}</div>
+  <div class="hindi">${e(c.hindi)}</div>
+  <div class="meaning">${e(c.meaning)}</div>
 </div>
 <div class="details">
-  <h3>📖 Episode</h3><p>${result.chaupai.episodeHi} — ${result.chaupai.episode}</p>
-  <h3>📚 Kand</h3><p>${result.chaupai.kandHi} (${result.chaupai.kand})</p>
-  <h3>🎓 Lesson</h3><p>${result.chaupai.lesson}</p>
-  <h3>💡 Inference</h3><p>${result.chaupai.inference}</p>
+  <h3>Episode · कथा</h3><p>${e(c.episodeHi)} — ${e(c.episode)}</p>
+  <h3>Kand · काण्ड</h3><p>${e(c.kandHi)} (${e(c.kand)})</p>
+  <h3>Lesson · शिक्षा</h3><p>${e(c.lesson)}</p>
+  <h3>Guidance · निष्कर्ष</h3><p>${e(c.inference)}</p>
 </div>
 <div class="footer">
   <p>श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>
@@ -228,7 +238,6 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
   // Load from URL on mount
   useEffect(() => {
-    setHistory(loadHistory());
     const params = new URLSearchParams(window.location.search);
     const cellParam = params.get('cell');
     const qParam = params.get('q');
@@ -237,10 +246,18 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
       if (!isNaN(cellIndex) && cellIndex >= 0 && cellIndex < 225) {
         const row = Math.floor(cellIndex / 15);
         const col = cellIndex % 15;
-        if (qParam) setPendingQuestion(qParam);
-        setTimeout(() => handleLetterSelect(row, col), 300);
+        startRef.current = setTimeout(() => {
+          startRef.current = null;
+          runPrashna(row, col, qParam ?? '');
+        }, 300);
       }
     }
+    // Stop pending timers and speech when leaving the page.
+    return () => {
+      if (startRef.current) clearTimeout(startRef.current);
+      if (animationRef.current) clearTimeout(animationRef.current);
+      window.speechSynthesis?.cancel();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -252,78 +269,80 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
     }
   }, [showResult]);
 
+  type Action = {
+    key: string;
+    label: string;
+    Icon: LucideIcon | typeof WhatsAppIcon;
+    variant: 'primary' | 'neutral' | 'active' | 'whatsapp';
+    disabled?: boolean;
+    spin?: boolean;
+  };
+
+  const actions: Action[] = result ? [
+    { key: 'reset', label: 'पुनः प्रश्न', Icon: RotateCcw, variant: 'primary' },
+    {
+      key: 'speak', label: isSpeaking ? 'बंद करें' : 'सुनें', Icon: isSpeaking ? VolumeX : Volume2,
+      variant: isSpeaking ? 'active' : 'neutral',
+    },
+    { key: 'print', label: 'प्रिंट', Icon: Printer, variant: 'neutral' },
+    {
+      key: 'image', label: isDownloading ? 'बना रहे हैं...' : 'फ़ोटो डाउनलोड', Icon: isDownloading ? Loader2 : ImageDown,
+      variant: 'neutral', disabled: isDownloading, spin: isDownloading,
+    },
+    { key: 'copy', label: copied ? 'कॉपी हो गया!' : 'लिंक कॉपी', Icon: copied ? Check : Link2, variant: 'neutral' },
+    { key: 'whatsapp', label: 'WhatsApp', Icon: WhatsAppIcon, variant: 'whatsapp' },
+  ] : [];
+
+  const handleAction = (key: string) => {
+    switch (key) {
+      case 'reset': return handleReset();
+      case 'speak': return handleSpeak(result?.chaupai.hindi || '');
+      case 'print': return handlePrint();
+      case 'image': return handleDownloadImage();
+      case 'copy': return handleShare();
+      case 'whatsapp': return handleWhatsAppShare();
+    }
+  };
+
+  const variantClass: Record<Action['variant'], string> = {
+    primary: 'bg-accent text-on-accent hover:bg-accent-hover shadow-md',
+    active: 'bg-accent text-on-accent hover:bg-accent-hover',
+    neutral: 'bg-surface border border-line-strong text-ink-2 hover:bg-surface-2 hover:text-ink shadow-sm',
+    whatsapp: 'bg-[#1f7a4d] text-white hover:bg-[#19663f] shadow-sm',
+  };
+
   return (
     <div className="min-h-screen pattern-bg">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        {/* Question input */}
-        {!result && !isAnimating && (
-          <div className="max-w-xl mx-auto mb-6 animate-fade-in">
-            <div className="card-premium rounded-xl p-5">
-              <label className="block text-center mb-3">
-                <span className="text-sm font-medium text-saffron-700">
-                  अपना प्रश्न लिखें · Write your question
-                </span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={pendingQuestion}
-                  onChange={(e) => setPendingQuestion(e.target.value)}
-                  placeholder="जैसे: क्या मेरा कार्य सफल होगा?"
-                  className="w-full px-4 py-3 bg-white/80 border border-saffron-200 rounded-lg text-saffron-900 placeholder-saffron-400 focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent text-center text-sm"
-                />
-                {pendingQuestion && (
-                  <button
-                    onClick={() => setPendingQuestion('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-saffron-400 hover:text-saffron-600"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-              <p className="text-center text-xs text-saffron-500 mt-2">
-                वैकल्पिक · Optional — you can also skip and just click a letter
-              </p>
-              <div className="text-center mt-3">
-                <button
-                  onClick={handleRandomAsk}
-                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-full font-medium text-sm hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"
-                >
-                  🙏 मेरे लिए पूछें · Ask for Me
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Instruction bar */}
+      <main className=" mx-auto px-4 py-6 sm:py-8">
+        {/* Instruction bar - only before first selection */}
         {!result && !isAnimating && !showResult && (
           <div className="card-premium rounded-xl p-4 sm:p-5 mb-6 animate-fade-in">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 text-sm text-saffron-700">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 text-sm text-ink-2">
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-saffron-500 text-white rounded-full flex items-center justify-center text-xs font-bold">१</span>
+                <span className="w-6 h-6 bg-accent text-on-accent rounded-full flex items-center justify-center text-xs font-bold">१</span>
                 शांत मन से प्रश्न स्मरण करें
               </span>
-              <span className="hidden sm:inline text-saffron-300">·</span>
+              <span className="hidden sm:inline text-gold">·</span>
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-saffron-500 text-white rounded-full flex items-center justify-center text-xs font-bold">२</span>
+                <span className="w-6 h-6 bg-accent text-on-accent rounded-full flex items-center justify-center text-xs font-bold">२</span>
                 ग्रिड में अक्षर चुनें
               </span>
-              <span className="hidden sm:inline text-saffron-300">·</span>
+              <span className="hidden sm:inline text-gold">·</span>
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-saffron-500 text-white rounded-full flex items-center justify-center text-xs font-bold">३</span>
+                <span className="w-6 h-6 bg-accent text-on-accent rounded-full flex items-center justify-center text-xs font-bold">३</span>
                 चौपाई पढ़ें, उत्तर पाएं
               </span>
             </div>
           </div>
         )}
 
+
         {/* Main content: Grid + Result side by side */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Left: Grid */}
-          <div className={`${showResult ? 'lg:w-[45%]' : 'w-full'} transition-all duration-500 relative`}>
+          <div className={`${showResult ? 'lg:w-[45%] lg:min-w-fit' : 'w-full'} transition-all duration-500 relative`}>
             <PrashnavaliGrid
               onLetterSelect={handleLetterSelect}
               revealedCells={revealedCells}
@@ -333,11 +352,11 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
             {/* Random Ask dramatic overlay */}
             {isRandom && !isAnimating && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] rounded-xl z-10">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 border-4 border-saffron-300 border-t-saffron-700 rounded-full animate-spin" />
-                  <p className="text-white font-bold text-lg animate-pulse">🙏 भगवान से पूछ रहे हैं...</p>
-                  <p className="text-saffron-200 text-xs">Asking the Lord...</p>
+                  <Loader2 size={48} className="text-amber-200 animate-spin" />
+                  <p className="text-white font-bold text-lg animate-pulse">भगवान से पूछ रहे हैं...</p>
+                  <p className="text-amber-100/80 text-xs">Asking the Lord...</p>
                 </div>
               </div>
             )}
@@ -346,72 +365,23 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
             {isAnimating && (
               <div className="text-center py-4 animate-fade-in">
                 <div className="inline-flex flex-col items-center gap-2">
-                  <div className="relative">
-                    <div className="w-8 h-8 border-2 border-saffron-200 rounded-full" />
-                    <div className="absolute top-0 left-0 w-8 h-8 border-2 border-saffron-600 rounded-full border-t-transparent animate-spin" />
-                  </div>
-                  <span className="text-saffron-700 font-medium text-xs">
+                  <Loader2 size={28} className="text-accent animate-spin" />
+                  <span className="text-ink-2 font-medium text-xs">
                     {revealedCells.length} / 25
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Ask Again + Share buttons */}
-            {showResult && !isAnimating && (
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-4 animate-fade-in">
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2.5 bg-gradient-to-r from-saffron-600 to-saffron-700 text-white rounded-lg font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  पुनः प्रश्न करें
-                </button>
-                <button
-                  onClick={() => handleSpeak(result?.chaupai.hindi || '')}
-                  className={`px-4 py-2.5 border rounded-lg font-medium text-sm shadow-sm transition-all duration-300 ${
-                    isSpeaking
-                      ? 'bg-red-500 border-red-600 text-white'
-                      : 'bg-white border-saffron-200 text-saffron-700 hover:bg-saffron-50'
-                  }`}
-                >
-                  {isSpeaking ? '🔇 बंद करें' : '🔊 सुनें'}
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
-                >
-                  🖨️ प्रिंट
-                </button>
-                <button
-                  onClick={handleDownloadImage}
-                  disabled={isDownloading}
-                  className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300 disabled:opacity-50"
-                >
-                  {isDownloading ? '⏳ बना रहे हैं...' : '🖼️ फ़ोटो डाउनलोड'}
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
-                >
-                  {copied ? '✓ कॉपी हो गया!' : '📋 लिंक कॉपी'}
-                </button>
-                <button
-                  onClick={handleWhatsAppShare}
-                  className="px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700 shadow-sm transition-all duration-300"
-                >
-                  WhatsApp
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Right: Result */}
           {showResult && result && !isAnimating && (
-            <div ref={resultRef} className="lg:w-[55%] animate-slide-up">
+            <div ref={resultRef} className="lg:flex-1 min-w-0 animate-slide-up">
               {question && (
-                <div className="card-premium rounded-xl p-4 mb-4 border-l-4 border-saffron-400">
-                  <p className="text-[10px] text-saffron-500 tracking-wider uppercase font-medium">Your Question</p>
-                  <p className="text-sm font-medium text-saffron-800 mt-1">{question}</p>
+                <div className="card-premium rounded-xl p-4 mb-4 border-l-4 border-accent">
+                  <p className="text-[11px] text-ink-3 tracking-wider uppercase font-medium">Your Question</p>
+                  <p className="text-sm font-medium text-ink mt-1">{question}</p>
                 </div>
               )}
               <ChaupaiCard
@@ -422,33 +392,73 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
             </div>
           )}
 
-
+          {/* Right sidebar: Action icons (desktop) */}
+          {showResult && !isAnimating && (
+            // Fixed-size buttons in a fixed-width column; the label floats as a
+            // tooltip so hovering or changing a label never reflows the layout.
+            <div className="hidden lg:flex flex-col gap-2 w-10 shrink-0 pt-4 animate-fade-in">
+              {actions.map(({ key, label, Icon, variant, disabled, spin }) => (
+                <button
+                  key={key}
+                  onClick={() => handleAction(key)}
+                  disabled={disabled}
+                  aria-label={label}
+                  className={`group relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 disabled:opacity-60 ${variantClass[variant]}`}
+                >
+                  <Icon size={18} className={spin ? 'animate-spin' : ''} />
+                  <span
+                    role="tooltip"
+                    className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-ink text-surface px-2.5 py-1.5 text-xs font-medium shadow-lg opacity-0 translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0"
+                  >
+                    {label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Action buttons — mobile (horizontal) */}
+        {showResult && !isAnimating && (
+          <div className="flex lg:hidden flex-wrap items-center justify-center gap-2 mt-6 animate-fade-in">
+            {actions.map(({ key, label, Icon, variant, disabled, spin }) => (
+              <button
+                key={key}
+                onClick={() => handleAction(key)}
+                disabled={disabled}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 disabled:opacity-60 ${variantClass[variant]}`}
+              >
+                <Icon size={16} className={spin ? 'animate-spin' : ''} />
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* History */}
         {history.length > 0 && !result && !isAnimating && (
           <div className="mt-12 animate-fade-in">
-            <div className="divider-traditional text-saffron-400 mb-4">।।</div>
-            <h3 className="text-lg font-bold text-saffron-800 text-center mb-4">
+            <div className="divider-traditional text-ink-3 mb-4">।।</div>
+            <h3 className="text-lg font-bold text-ink text-center mb-4">
               पिछले प्रश्न · Past Queries
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {history.slice(0, 6).map((item, index) => (
                 <div
                   key={index}
-                  className="card-premium rounded-lg p-4 cursor-pointer hover:shadow-md transition-all"
+                  className="card-premium rounded-xl p-4 cursor-pointer hover:border-line-strong hover:-translate-y-0.5 transition-all"
                   onClick={() => {
-                    const row = Math.floor(item.cell / 15);
-                    const col = item.cell % 15;
-                    if (item.question) setPendingQuestion(item.question);
-                    setTimeout(() => handleLetterSelect(row, col), 100);
+                    if (isAnimating) return;
+                    const row = Math.floor(item.cell / GRID_SIZE);
+                    const col = item.cell % GRID_SIZE;
+                    runPrashna(row, col, item.question || '');
                   }}
                 >
                   {item.question && (
-                    <p className="text-xs text-saffron-500 mb-1 truncate">{item.question}</p>
+                    <p className="text-xs text-ink-3 mb-1 truncate">{item.question}</p>
                   )}
-                  <p className="text-sm font-medium text-saffron-800 truncate">{item.chaupaiHindi}</p>
-                  <p className="text-[10px] text-saffron-500 mt-1">{item.result} · {new Date(item.timestamp).toLocaleDateString('hi-IN')}</p>
+                  <p className="text-sm font-medium text-ink truncate">{item.chaupaiHindi}</p>
+                  <p className="text-[11px] text-ink-3 mt-1">{item.result} · {new Date(item.timestamp).toLocaleDateString('hi-IN')}</p>
                 </div>
               ))}
             </div>
@@ -457,14 +467,87 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
         {/* Footer */}
         <footer className="text-center mt-12 py-6">
-          <div className="divider-traditional text-saffron-300 mb-3">◆</div>
-          <p className="text-saffron-600 text-sm">
-            <a href="/daily" className="underline hover:text-saffron-800 transition-colors">📅 आज की प्रश्नावली देखें</a>
+          <div className="divider-traditional text-gold mb-3">◆</div>
+          <p className="text-ink-2 text-sm">
+            <Link href="/daily" className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:text-accent transition-colors">
+              <CalendarDays size={16} /> आज की प्रश्नावली देखें
+            </Link>
           </p>
-          <p className="text-saffron-600 text-sm mt-2">श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>
-          <p className="text-saffron-400 text-xs mt-1">Shri Ramcharitmanas · Goswami Tulsidas</p>
+          <p className="text-ink-2 text-sm mt-2">श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>
+          <p className="text-ink-3 text-xs mt-1">Shri Ramcharitmanas · Goswami Tulsidas</p>
         </footer>
       </main>
+
+      {/* FAB — Ask for Me */}
+      {!isAnimating && (
+        <button
+          onClick={() => setShowPanel(!showPanel)}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-accent text-on-accent rounded-full ring-4 ring-accent-soft shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+          aria-label="Ask for Me"
+        >
+          {showPanel ? <X size={24} /> : <HandHeart size={26} />}
+        </button>
+      )}
+
+      {/* Slide-up panel */}
+      {showPanel && (
+        <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity" />
+          {/* Panel */}
+          <div
+            className="absolute bottom-0 left-0 right-0 card-premium rounded-t-2xl p-6 animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="max-w-xl mx-auto">
+              <label className="block text-center mb-3">
+                <span className="text-sm font-medium text-ink-2">
+                  {result ? 'नया प्रश्न लिखें · Ask a new question' : 'अपना प्रश्न लिखें · Write your question'}
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={pendingQuestion}
+                  onChange={(e) => setPendingQuestion(e.target.value)}
+                  placeholder="जैसे: क्या मेरा कार्य सफल होगा?"
+                  className="w-full px-4 py-3 bg-surface-2 border border-line-strong rounded-lg text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-center text-sm"
+                />
+                {pendingQuestion && (
+                  <button
+                    onClick={() => setPendingQuestion('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink"
+                    aria-label="Clear question"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <p className="text-center text-xs text-ink-3 mt-2 mb-4">
+                वैकल्पिक · Optional — you can also skip and just click a letter
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleRandomAsk}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 tone-prabhu text-white rounded-lg font-medium text-sm hover:brightness-110 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Sparkles size={16} /> मेरे लिए पूछें · Ask for Me
+                </button>
+                <button
+                  onClick={() => {
+                    if (pendingQuestion.trim()) {
+                      setShowPanel(false);
+                    }
+                  }}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-on-accent rounded-lg font-medium text-sm hover:bg-accent-hover shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  <Send size={16} /> प्रश्न दर्ज करें
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

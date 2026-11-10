@@ -2,12 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { Chaupai } from '@/data/chaupais';
+import {
+  BookOpen, ChevronRight, CircleCheck, GraduationCap, Landmark, Lightbulb,
+  MapPin, ScrollText, Sparkles, TriangleAlert,
+} from 'lucide-react';
 
 interface ChaupaiCardProps {
   chaupai: Chaupai;
   selectedLetter: string;
   letterSequence: string[];
 }
+
+const LABEL = 'text-[11px] text-ink-3 mb-1.5 tracking-wider uppercase font-semibold';
+
+const RESULT_STYLES = {
+  'शुभ': { tone: 'tone-shubh', Icon: CircleCheck },
+  'अशुभ': { tone: 'tone-ashubh', Icon: TriangleAlert },
+  'प्रभु_इच्छा': { tone: 'tone-prabhu', Icon: Sparkles },
+} as const;
 
 export default function ChaupaiCard({
   chaupai,
@@ -21,74 +33,41 @@ export default function ChaupaiCard({
     return () => clearTimeout(timer);
   }, []);
 
-  const getResultStyles = () => {
-    switch (chaupai.result) {
-      case 'शुभ':
-        return {
-          headerBg: 'from-green-500 to-emerald-600',
-          badge: 'badge-shubh',
-          icon: '✅',
-          accent: 'border-green-200',
-        };
-      case 'अशुभ':
-        return {
-          headerBg: 'from-red-500 to-rose-600',
-          badge: 'badge-ashubh',
-          icon: '⚠️',
-          accent: 'border-red-200',
-        };
-      case 'प्रभु_इच्छा':
-        return {
-          headerBg: 'from-yellow-500 to-amber-600',
-          badge: 'badge-prabhu',
-          icon: '🙏',
-          accent: 'border-yellow-200',
-        };
-      default:
-        return {
-          headerBg: 'from-gray-500 to-gray-600',
-          badge: 'bg-gray-500',
-          icon: '📜',
-          accent: 'border-gray-200',
-        };
-    }
-  };
-
-  const styles = getResultStyles();
+  const styles = RESULT_STYLES[chaupai.result] ?? RESULT_STYLES['प्रभु_इच्छा'];
 
   return (
     <div
       className={`
-        card-result rounded-2xl overflow-hidden border-2 ${styles.accent}
+        card-result rounded-xl overflow-hidden
         transition-all duration-700
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
       `}
     >
-      {/* Compact Header */}
-      <div className={`bg-gradient-to-r ${styles.headerBg} px-5 py-4 text-white relative overflow-hidden`}>
-        <span className="absolute top-1 right-3 text-4xl text-white/20 font-serif">ॐ</span>
-        <div className="relative z-10 flex items-center justify-between">
+      {/* Header */}
+      <div className={`${styles.tone} px-5 py-4 text-white relative overflow-hidden`}>
+        <span className="absolute -top-2 right-3 text-6xl text-white/10 font-serif select-none" aria-hidden>ॐ</span>
+        <div className="relative z-10 flex items-center justify-between gap-3">
           <div>
-            <p className="text-white/80 text-xs mb-0.5">चयनित अक्षर · Selected</p>
+            <p className="text-white/75 text-xs mb-0.5">चयनित अक्षर · Selected</p>
             <span className="text-3xl font-bold">{selectedLetter}</span>
           </div>
-          <span className={`${styles.badge} inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold shadow-lg`}>
-            <span>{styles.icon}</span>
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-semibold bg-white/15 ring-1 ring-white/35 backdrop-blur-sm">
+            <styles.Icon size={16} aria-hidden />
             {chaupai.resultLabelEn}
           </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-5 space-y-4">
+      <div className="p-5 space-y-5">
         {/* Letter Sequence */}
         <div>
-          <p className="text-[10px] text-saffron-500 mb-1.5 tracking-wider uppercase font-medium">अक्षर माला</p>
+          <p className={LABEL}>अक्षर माला</p>
           <div className="flex flex-wrap gap-1">
             {letterSequence.map((letter, index) => (
               <span
                 key={index}
-                className="animate-reveal-letter inline-flex items-center justify-center w-7 h-7 bg-saffron-50 border border-saffron-200 rounded text-xs font-medium text-saffron-800"
+                className="animate-reveal-letter inline-flex items-center justify-center min-w-7 h-7 px-1 bg-surface-2 border border-line rounded-md text-xs font-medium text-ink-2"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 {letter}
@@ -98,61 +77,62 @@ export default function ChaupaiCard({
         </div>
 
         {/* Chaupai */}
-        <div className="bg-gradient-to-br from-saffron-50 to-amber-50 rounded-xl p-4 border border-saffron-100">
-          <p className="text-[10px] text-saffron-500 mb-1.5 tracking-wider uppercase font-medium">चौपाई · Chaupai</p>
-          <p className="text-base sm:text-lg font-semibold text-saffron-900 leading-relaxed">{chaupai.hindi}</p>
-          <p className="text-xs text-saffron-500 mt-1.5 italic">{chaupai.transliteration}</p>
+        <div className="bg-accent-soft rounded-lg px-5 py-4 border-l-4 border-accent">
+          <p className={`${LABEL} flex items-center gap-1.5`}><ScrollText size={13} /> चौपाई · Chaupai</p>
+          <p className="text-lg sm:text-xl font-semibold text-verse leading-loose">{chaupai.hindi}</p>
+          <p className="text-xs text-ink-3 mt-1 italic">{chaupai.transliteration}</p>
         </div>
 
         {/* Meaning */}
         <div>
-          <p className="text-[10px] text-saffron-500 mb-1.5 tracking-wider uppercase font-medium">अर्थ · Meaning</p>
-          <p className="text-sm text-saffron-800 leading-relaxed">{chaupai.meaning}</p>
+          <p className={LABEL}>अर्थ · Meaning</p>
+          <p className="text-[15px] text-ink leading-relaxed">{chaupai.meaningHi}</p>
+          <p className="text-sm text-ink-3 mt-1 italic">{chaupai.meaning}</p>
         </div>
 
         {/* Kand & Context row */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-saffron-50/60 rounded-lg p-3 border border-saffron-100">
-            <p className="text-[10px] text-saffron-500 mb-1 tracking-wider uppercase font-medium">काण्ड · Chapter</p>
-            <p className="text-sm font-semibold text-saffron-800">{chaupai.kandHi}</p>
-            <p className="text-xs text-saffron-500">{chaupai.kand} · {chaupai.kandNumber} of 7</p>
+          <div className="bg-surface-2 rounded-lg p-3 border border-line">
+            <p className={`${LABEL} flex items-center gap-1.5`}><Landmark size={13} /> काण्ड · Chapter</p>
+            <p className="text-sm font-semibold text-ink">{chaupai.kandHi}</p>
+            <p className="text-xs text-ink-3 mt-0.5">{chaupai.kand} · {chaupai.kandNumber} of 7</p>
           </div>
-          <div className="bg-saffron-50/60 rounded-lg p-3 border border-saffron-100">
-            <p className="text-[10px] text-saffron-500 mb-1 tracking-wider uppercase font-medium">प्रसंग · Context</p>
-            <p className="text-sm font-semibold text-saffron-800">{chaupai.contextHi}</p>
-            <p className="text-xs text-saffron-500">{chaupai.context}</p>
+          <div className="bg-surface-2 rounded-lg p-3 border border-line">
+            <p className={`${LABEL} flex items-center gap-1.5`}><MapPin size={13} /> प्रसंग · Context</p>
+            <p className="text-sm font-semibold text-ink">{chaupai.contextHi}</p>
+            <p className="text-xs text-ink-3 mt-0.5">{chaupai.context}</p>
           </div>
         </div>
 
         {/* Episode (story) */}
         <details className="group">
-          <summary className="cursor-pointer text-xs font-medium text-saffron-600 hover:text-saffron-800 flex items-center gap-1.5 transition-colors">
-            <span className="group-open:rotate-90 transition-transform">▶</span>
-            कथा · Episode Story
+          <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer text-sm font-medium text-ink-2 hover:text-accent flex items-center gap-1.5 transition-colors">
+            <ChevronRight size={16} className="group-open:rotate-90 transition-transform" />
+            <BookOpen size={15} /> कथा · Episode Story
           </summary>
-          <div className="mt-2 bg-saffron-50/40 rounded-lg p-3 border border-saffron-100/50">
-            <p className="text-xs text-saffron-700 leading-relaxed">{chaupai.episodeHi}</p>
-            <p className="text-xs text-saffron-500 mt-1.5 italic">{chaupai.episode}</p>
+          <div className="mt-2 bg-surface-2 rounded-lg p-3 border border-line">
+            <p className="text-sm text-ink leading-relaxed">{chaupai.episodeHi}</p>
+            <p className="text-xs text-ink-3 mt-1.5 italic leading-relaxed">{chaupai.episode}</p>
           </div>
         </details>
 
         {/* Lesson */}
         <details className="group">
-          <summary className="cursor-pointer text-xs font-medium text-saffron-600 hover:text-saffron-800 flex items-center gap-1.5 transition-colors">
-            <span className="group-open:rotate-90 transition-transform">▶</span>
-            शिक्षा · Life Lesson
+          <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer text-sm font-medium text-ink-2 hover:text-accent flex items-center gap-1.5 transition-colors">
+            <ChevronRight size={16} className="group-open:rotate-90 transition-transform" />
+            <GraduationCap size={15} /> शिक्षा · Life Lesson
           </summary>
-          <div className="mt-2 bg-saffron-50/40 rounded-lg p-3 border border-saffron-100/50">
-            <p className="text-xs text-saffron-700">{chaupai.lessonHi}</p>
-            <p className="text-xs text-saffron-500 mt-1 italic">{chaupai.lesson}</p>
+          <div className="mt-2 bg-surface-2 rounded-lg p-3 border border-line">
+            <p className="text-sm text-ink">{chaupai.lessonHi}</p>
+            <p className="text-xs text-ink-3 mt-1 italic">{chaupai.lesson}</p>
           </div>
         </details>
 
         {/* Inference */}
-        <div className="bg-gradient-to-r from-saffron-100 via-amber-50 to-saffron-100 rounded-xl p-4 border border-saffron-200/50">
-          <p className="text-[10px] text-saffron-500 mb-1 tracking-wider uppercase font-medium">निष्कर्ष · Guidance</p>
-          <p className="text-sm font-semibold text-saffron-900">{chaupai.inference}</p>
-          <p className="text-xs text-saffron-600 mt-0.5">{chaupai.inferenceHi}</p>
+        <div className="rounded-lg p-4 bg-surface-3 border border-line-strong">
+          <p className={`${LABEL} flex items-center gap-1.5`}><Lightbulb size={13} /> निष्कर्ष · Guidance</p>
+          <p className="text-[15px] font-semibold text-ink">{chaupai.inferenceHi}</p>
+          <p className="text-sm text-ink-2 mt-0.5">{chaupai.inference}</p>
         </div>
       </div>
     </div>

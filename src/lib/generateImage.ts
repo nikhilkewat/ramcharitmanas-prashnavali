@@ -158,7 +158,7 @@ export async function generateResultImage(
   dy = drawDetail(dy, '\uD83D\uDCD6', 'Episode', chaupai.episodeHi);
   dy = drawDetail(dy, '\uD83D\uDCDA', 'Kand', chaupai.kandHi + ' (' + chaupai.kand + ')');
   dy = drawDetail(dy, '\uD83C\uDF93', 'Lesson', chaupai.lessonHi);
-  dy = drawDetail(dy, '\uD83D\uDCA1', 'Inference', chaupai.inferenceHi);
+  drawDetail(dy, '\uD83D\uDCA1', 'Inference', chaupai.inferenceHi);
 
   ctx.strokeStyle = '#d97706';
   ctx.globalAlpha = 0.3;

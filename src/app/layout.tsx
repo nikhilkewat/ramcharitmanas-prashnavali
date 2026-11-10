@@ -21,6 +21,8 @@ export const viewport: Viewport = {
 const baseUrl = 'https://ramcharitmanas.vercel.app';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  alternates: { canonical: '/' },
   title: {
     default: "श्री राम प्रश्नावली | Ram Prashnavali - Ram Shalaka",
     template: "%s | Ram Prashnavali",
@@ -40,7 +42,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "hi_IN",
-    alternateLocale: "en_US",
     url: baseUrl,
     siteName: "श्री राम प्रश्नावली | Ram Prashnavali",
     title: "श्री राम प्रश्नावली | Ram Prashnavali",
@@ -73,6 +74,10 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -100,25 +105,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       "@type": "Organization",
       name: "Ram Prashnavali",
     },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${baseUrl}?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   };
 
   return (
     <html
       lang="hi"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <link rel="canonical" href={baseUrl} />
-        <link rel="alternate" hrefLang="hi" href={baseUrl} />
-        <link rel="alternate" hrefLang="en" href={`${baseUrl}?lang=en`} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
