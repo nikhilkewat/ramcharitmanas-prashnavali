@@ -56,8 +56,14 @@ export function useHistory(): HistoryItem[] {
   return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY);
 }
 
+const sameReading = (a: HistoryItem, b: HistoryItem) =>
+  a.cell === b.cell && (a.question ?? '').trim() === (b.question ?? '').trim();
+
+// The same cell + question (e.g. reopening a shared link or reloading the
+// page) moves the existing entry to the top instead of adding a copy.
 export function saveHistory(item: HistoryItem) {
-  const next = [item, ...getSnapshot()].slice(0, MAX_HISTORY);
+  const rest = getSnapshot().filter((h) => !sameReading(h, item));
+  const next = [item, ...rest].slice(0, MAX_HISTORY);
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
   } catch {
