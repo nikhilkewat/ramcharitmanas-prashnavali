@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import PrashnavaliGrid from '@/components/PrashnavaliGrid';
 import ChaupaiCard from '@/components/ChaupaiCard';
-import SceneBackdrop, { nextSceneIndex } from '@/components/SceneBackdrop';
 import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali';
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
@@ -48,7 +47,6 @@ export default function Home() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
-  const [sceneIndex, setSceneIndex] = useState(0);
 
   // All inputs are passed explicitly so the timer callbacks never read stale state.
   const animateReveal = useCallback((prashResult: PrashnavaliResult, askedQuestion: string) => {
@@ -88,7 +86,6 @@ export default function Home() {
     setIsRandom(false);
     setQuestion(q);
     setPendingQuestion(q);
-    setSceneIndex(nextSceneIndex);
     const prashResult = generatePrashnavaliResult(row, col);
     animateReveal(prashResult, q);
 
@@ -315,8 +312,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   };
 
   return (
-    <div className="min-h-screen pattern-bg relative isolate">
-      <SceneBackdrop index={sceneIndex} />
+    <div className="min-h-screen pattern-bg">
       <Header />
 
       <main className="mx-auto px-3 sm:px-4 py-4 sm:py-8">
