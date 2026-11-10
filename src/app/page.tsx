@@ -29,6 +29,15 @@ function loadHistory(): HistoryItem[] {
   } catch { return []; }
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function saveHistory(item: HistoryItem) {
   const history = loadHistory();
   history.unshift(item);
@@ -55,7 +64,10 @@ export default function Home() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
 
-  const animateReveal = useCallback((cells: number[], prashResult: PrashnavaliResult) => {
+  // All inputs are passed explicitly so the timer callbacks never read stale state.
+  const animateReveal = useCallback((prashResult: PrashnavaliResult, askedQuestion: string) => {
+    if (animationRef.current) clearTimeout(animationRef.current);
+    const cells = prashResult.highlightedCells;
     setIsAnimating(true);
     setRevealedCells([]);
     setShowResult(false);
@@ -71,11 +83,9 @@ export default function Home() {
         setIsAnimating(false);
         setShowResult(true);
         setResult(prashResult);
-        const cellParam = new URLSearchParams(window.location.search).get('cell');
-        const cellIndex = cellParam ? parseInt(cellParam, 10) : -1;
         saveHistory({
-          cell: cellIndex !== -1 ? cellIndex : 0,
-          question: question,
+          cell: prashResult.selectedPosition,
+          question: askedQuestion,
           chaupaiHindi: prashResult.chaupai.hindi,
           chaupaiMeaning: prashResult.chaupai.meaning,
           result: prashResult.chaupai.resultLabelEn,
@@ -88,16 +98,24 @@ export default function Home() {
     animationRef.current = setTimeout(tick, REVEAL_DELAY);
   }, []);
 
-  const handleLetterSelect = (row: number, col: number) => {
-    if (isAnimating) return;
-    setQuestion(pendingQuestion);
+  const runPrashna = useCallback((row: number, col: number, askedQuestion: string) => {
+    const q = askedQuestion.trim();
+    setIsRandom(false);
+    setQuestion(q);
+    setPendingQuestion(q);
     const prashResult = generatePrashnavaliResult(row, col);
-    animateReveal(prashResult.highlightedCells, prashResult);
+    animateReveal(prashResult, q);
 
     const params = new URLSearchParams(window.location.search);
     params.set('cell', String(prashResult.selectedPosition));
-    if (pendingQuestion.trim()) params.set('q', pendingQuestion.trim());
+    if (q) params.set('q', q);
+    else params.delete('q');
     router.replace('?' + params.toString(), { scroll: false });
+  }, [animateReveal, router]);
+
+  const handleLetterSelect = (row: number, col: number) => {
+    if (isAnimating) return;
+    runPrashna(row, col, pendingQuestion);
   };
 
   const handleReset = () => {
@@ -147,7 +165,7 @@ export default function Home() {
     const row = Math.floor(randomPos / GRID_SIZE);
     const col = randomPos % GRID_SIZE;
     setTimeout(() => {
-      handleLetterSelect(row, col);
+      runPrashna(row, col, '');
     }, 1500);
   };
 
@@ -181,8 +199,12 @@ export default function Home() {
   };
 
   const handlePrint = () => {
+    if (!result) return;
     const printWindow = window.open('', '_blank');
-    if (!printWindow || !result) return;
+    if (!printWindow) return;
+    const c = result.chaupai;
+    const e = escapeHtml;
+    const badgeClass = c.result === 'शुभ' ? 'auspicious' : c.result === 'अशुभ' ? 'caution' : 'neutral';
     printWindow.document.write(`<!DOCTYPE html>
 <html><head><title>Ram Prashnavali</title>
 <style>
@@ -207,17 +229,17 @@ export default function Home() {
   <h1>🙏 श्री राम प्रश्नावली</h1>
   <p>Ram Prashnavali — Shri Ram Shalaka</p>
 </div>
-<div class="result-badge"><span class="${result.chaupai.resultLabelEn.includes('Auspicious') ? 'auspicious' : result.chaupai.resultLabelEn.includes('Caution') ? 'caution' : 'neutral'}">${result.chaupai.resultLabel} · ${result.chaupai.resultLabelEn}</span></div>
-${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16px 0;">"${question}"</p>` : ''}
+<div class="result-badge"><span class="${badgeClass}">${e(c.resultLabel)} · ${e(c.resultLabelEn)}</span></div>
+${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16px 0;">"${e(question)}"</p>` : ''}
 <div class="chaupai">
-  <div class="hindi">${result.chaupai.hindi}</div>
-  <div class="meaning">${result.chaupai.meaning}</div>
+  <div class="hindi">${e(c.hindi)}</div>
+  <div class="meaning">${e(c.meaning)}</div>
 </div>
 <div class="details">
-  <h3>📖 Episode</h3><p>${result.chaupai.episodeHi} — ${result.chaupai.episode}</p>
-  <h3>📚 Kand</h3><p>${result.chaupai.kandHi} (${result.chaupai.kand})</p>
-  <h3>🎓 Lesson</h3><p>${result.chaupai.lesson}</p>
-  <h3>💡 Inference</h3><p>${result.chaupai.inference}</p>
+  <h3>📖 Episode</h3><p>${e(c.episodeHi)} — ${e(c.episode)}</p>
+  <h3>📚 Kand</h3><p>${e(c.kandHi)} (${e(c.kand)})</p>
+  <h3>🎓 Lesson</h3><p>${e(c.lesson)}</p>
+  <h3>💡 Inference</h3><p>${e(c.inference)}</p>
 </div>
 <div class="footer">
   <p>श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>
@@ -239,8 +261,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
       if (!isNaN(cellIndex) && cellIndex >= 0 && cellIndex < 225) {
         const row = Math.floor(cellIndex / 15);
         const col = cellIndex % 15;
-        if (qParam) setPendingQuestion(qParam);
-        setTimeout(() => handleLetterSelect(row, col), 300);
+        setTimeout(() => runPrashna(row, col, qParam ?? ''), 300);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -451,10 +472,10 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
                   key={index}
                   className="card-premium rounded-md p-4 cursor-pointer hover:shadow-md transition-all"
                   onClick={() => {
-                    const row = Math.floor(item.cell / 15);
-                    const col = item.cell % 15;
-                    if (item.question) setPendingQuestion(item.question);
-                    setTimeout(() => handleLetterSelect(row, col), 100);
+                    if (isAnimating) return;
+                    const row = Math.floor(item.cell / GRID_SIZE);
+                    const col = item.cell % GRID_SIZE;
+                    runPrashna(row, col, item.question || '');
                   }}
                 >
                   {item.question && (
