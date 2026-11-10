@@ -389,7 +389,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
           {/* Right: Result */}
           {showResult && result && !isAnimating && (
-            <div ref={resultRef} className="lg:w-[50%] animate-slide-up">
+            <div ref={resultRef} className="lg:flex-1 min-w-0 animate-slide-up">
               {question && (
                 <div className="card-premium rounded-xl p-4 mb-4 border-l-4 border-accent">
                   <p className="text-[11px] text-ink-3 tracking-wider uppercase font-medium">Your Question</p>
@@ -406,18 +406,24 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
           {/* Right sidebar: Action icons (desktop) */}
           {showResult && !isAnimating && (
-            <div className="hidden lg:flex flex-col items-start gap-2 lg:w-[8%] pt-4 animate-fade-in">
+            // Fixed-size buttons in a fixed-width column; the label floats as a
+            // tooltip so hovering or changing a label never reflows the layout.
+            <div className="hidden lg:flex flex-col gap-2 w-10 shrink-0 pt-4 animate-fade-in">
               {actions.map(({ key, label, Icon, variant, disabled, spin }) => (
                 <button
                   key={key}
                   onClick={() => handleAction(key)}
                   disabled={disabled}
-                  title={label}
                   aria-label={label}
-                  className={`group flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 overflow-hidden whitespace-nowrap hover:w-36 hover:justify-start hover:px-3 hover:gap-2 disabled:opacity-60 ${variantClass[variant]}`}
+                  className={`group relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 disabled:opacity-60 ${variantClass[variant]}`}
                 >
-                  <Icon size={18} className={`shrink-0 ${spin ? 'animate-spin' : ''}`} />
-                  <span className="hidden group-hover:inline text-sm font-medium leading-none">{label}</span>
+                  <Icon size={18} className={spin ? 'animate-spin' : ''} />
+                  <span
+                    role="tooltip"
+                    className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-ink text-surface px-2.5 py-1.5 text-xs font-medium shadow-lg opacity-0 translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0"
+                  >
+                    {label}
+                  </span>
                 </button>
               ))}
             </div>
