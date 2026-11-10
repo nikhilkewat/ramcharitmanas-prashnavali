@@ -1,8 +1,109 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic colour tokens. Components use these (bg-surface, text-ink, ...)
+ * instead of raw palette classes, so light and dark themes stay in sync.
+ * Palette: warm parchment / night-brown base, kesari (saffron) accent,
+ * gold ornament, and tulsi / kumkum / haldi tones for the three results.
+ */
+:root {
+  --bg: #f8f0e3;
+  --bg-glow: rgba(214, 110, 40, 0.08);
+  --surface: #fffaf2;
+  --surface-2: #fbefdc;
+  --surface-3: #f4e1c1;
+  --line: rgba(120, 53, 15, 0.14);
+  --line-strong: rgba(120, 53, 15, 0.28);
+  --ink: #34190a;
+  --ink-2: #5f3414;
+  --ink-3: #87582f;
+  --verse: #561c08;
+  --accent: #b5491a;
+  --accent-hover: #963a12;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(181, 73, 26, 0.1);
+  --gold: #a87a12;
+
+  --board-a: #7a3a12;
+  --board-b: #4a210a;
+  --cell: #fff4e0;
+  --cell-ink: #4a230b;
+  --cell-hover: #ffe0b0;
+  --cell-revealed: #f3b25e;
+  --cell-revealed-ink: #3a1803;
+  --cell-selected: #c8561c;
+  --cell-selected-ink: #ffffff;
+
+  --shubh-a: #1d6a43;
+  --shubh-b: #2c8656;
+  --ashubh-a: #8a2414;
+  --ashubh-b: #b0461b;
+  --prabhu-a: #946405;
+  --prabhu-b: #bb8613;
+
+  --shadow: 0 1px 2px rgba(120, 53, 15, 0.06), 0 8px 24px -8px rgba(120, 53, 15, 0.14);
+}
+
+.dark {
+  --bg: #120a05;
+  --bg-glow: rgba(232, 129, 58, 0.07);
+  --surface: #1d120a;
+  --surface-2: #26180d;
+  --surface-3: #312012;
+  --line: rgba(232, 190, 120, 0.13);
+  --line-strong: rgba(232, 190, 120, 0.26);
+  --ink: #f2e4cb;
+  --ink-2: #d8bf98;
+  --ink-3: #a98b64;
+  --verse: #ffe0ad;
+  --accent: #e8813a;
+  --accent-hover: #f39a57;
+  --on-accent: #1a0c03;
+  --accent-soft: rgba(232, 129, 58, 0.14);
+  --gold: #deb35c;
+
+  --board-a: #3b1d0a;
+  --board-b: #1c0e05;
+  --cell: #2a1a0e;
+  --cell-ink: #e9d5b2;
+  --cell-hover: #3d2816;
+  --cell-revealed: #7a4214;
+  --cell-revealed-ink: #ffe9c4;
+  --cell-selected: #e8813a;
+  --cell-selected-ink: #1a0c03;
+
+  --shubh-a: #154a2f;
+  --shubh-b: #1f6a44;
+  --ashubh-a: #651a10;
+  --ashubh-b: #8a3416;
+  --prabhu-a: #6b4804;
+  --prabhu-b: #926510;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
 @theme inline {
-  --color-background: #fdf6ee;
-  --color-foreground: #1a1a1a;
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-verse: var(--verse);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-gold: var(--gold);
+
+  /* Fixed palette, used by the always-dark header */
   --color-saffron-50: #fff8f0;
   --color-saffron-100: #ffedd5;
   --color-saffron-200: #ffd9b3;
@@ -14,15 +115,7 @@
   --color-saffron-800: #78350f;
   --color-saffron-900: #451a03;
   --color-gold-400: #facc15;
-  --color-gold-500: #eab308;
-  --color-gold-600: #ca8a04;
-  --color-divine-50: #fefce8;
-  --color-divine-100: #fef9c3;
-  --color-divine-200: #fef08a;
-  --color-divine-500: #eab308;
-  --color-maroon-600: #9f1239;
-  --color-maroon-700: #881337;
-  --color-maroon-800: #6b1027;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -36,8 +129,8 @@ html {
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-geist-sans), Georgia, 'Times New Roman', serif;
   min-height: 100vh;
 }
@@ -61,10 +154,11 @@ body {
 
 /* Traditional pattern background */
 .pattern-bg {
-  background-color: #fdf6ee;
+  background-color: var(--bg);
   background-image:
-    radial-gradient(circle at 25% 25%, rgba(217, 119, 6, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(217, 119, 6, 0.05) 0%, transparent 50%);
+    radial-gradient(circle at 20% 10%, var(--bg-glow) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, var(--bg-glow) 0%, transparent 45%);
+  background-attachment: fixed;
 }
 
 /* OM symbol decorative background */
@@ -164,57 +258,35 @@ body {
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 
-/* Premium card styles */
-.card-premium {
-  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,248,240,0.9) 100%);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(217, 119, 6, 0.15);
-  box-shadow:
-    0 4px 6px -1px rgba(217, 119, 6, 0.1),
-    0 10px 30px -5px rgba(217, 119, 6, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
+/* Card surfaces */
+.card-premium,
 .card-result {
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,252,232,0.95) 100%);
-  backdrop-filter: blur(20px);
-  box-shadow:
-    0 8px 32px rgba(217, 119, 6, 0.15),
-    0 2px 8px rgba(217, 119, 6, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
 }
 
-/* Grid cell styles */
-.grid-cell {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(217, 119, 6, 0.12);
-}
+/* Result header tones */
+.tone-shubh { background: linear-gradient(120deg, var(--shubh-a), var(--shubh-b)); }
+.tone-ashubh { background: linear-gradient(120deg, var(--ashubh-a), var(--ashubh-b)); }
+.tone-prabhu { background: linear-gradient(120deg, var(--prabhu-a), var(--prabhu-b)); }
 
-.grid-cell:hover:not(:disabled) {
-  transform: scale(1.08);
-  border-color: rgba(217, 119, 6, 0.4);
-  box-shadow: 0 2px 12px rgba(217, 119, 6, 0.15);
-  z-index: 10;
+/* Shalaka board + cells */
+.shalaka-board {
+  background: linear-gradient(145deg, var(--board-a) 0%, var(--board-b) 100%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45), 0 6px 20px -6px rgba(60, 25, 5, 0.45);
 }
-
-.grid-cell:active:not(:disabled) {
-  transform: scale(0.95);
+.cell { background: var(--cell); color: var(--cell-ink); }
+.cell:not(:disabled):hover { background: var(--cell-hover); }
+.cell-revealed {
+  background: var(--cell-revealed);
+  color: var(--cell-revealed-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent);
 }
-
-.grid-cell-highlighted {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-  border-color: rgba(217, 119, 6, 0.5) !important;
-  box-shadow: 0 0 12px rgba(217, 119, 6, 0.2);
-  animation: cellGlow 1s ease-out;
-}
-
-.grid-cell-selected {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-  color: white !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.4);
-  z-index: 20;
-  border-color: #92400e !important;
+.cell-selected {
+  background: var(--cell-selected);
+  color: var(--cell-selected-ink);
+  box-shadow: 0 0 0 2px var(--gold), 0 6px 18px -4px rgba(232, 129, 58, 0.6);
 }
 
 /* Traditional divider */
@@ -222,7 +294,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: rgba(217, 119, 6, 0.5);
+  color: var(--gold);
 }
 
 .divider-traditional::before,
@@ -230,23 +302,7 @@ body {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(217, 119, 6, 0.3), transparent);
-}
-
-/* Result badge styles */
-.badge-shubh {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
-}
-
-.badge-ashubh {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.badge-prabhu {
-  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
-  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3);
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
 }
 
 /* Scroll to top */
@@ -258,89 +314,10 @@ body {
   transform: translateY(-2px);
 }
 
-/* Dark mode */
-.dark body,
-.dark {
-  background: #1a0f05;
-  color: #fde8d0;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
-
-.dark .pattern-bg {
-  background-color: #1a0f05;
-  background-image:
-    radial-gradient(circle at 25% 25%, rgba(217, 119, 6, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(217, 119, 6, 0.03) 0%, transparent 50%);
-}
-
-.dark .card-premium {
-  background: linear-gradient(135deg, rgba(40,25,10,0.9) 0%, rgba(50,30,15,0.9) 100%);
-  border-color: rgba(217, 119, 6, 0.2);
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 10px 30px -5px rgba(0,0,0,0.2);
-}
-
-.dark .card-result {
-  background: linear-gradient(135deg, rgba(40,25,10,0.95) 0%, rgba(50,30,15,0.95) 100%);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.dark .text-saffron-50 { color: #fef3c7; }
-.dark .text-saffron-600 { color: #f59e0b; }
-.dark .text-saffron-700 { color: #fbbf24; }
-.dark .text-saffron-800 { color: #fcd34d; }
-.dark .text-saffron-900 { color: #fef3c7; }
-.dark .text-saffron-500 { color: #f59e0b; }
-.dark .text-saffron-400 { color: #fbbf24; }
-.dark .text-saffron-300 { color: #fde68a; }
-.dark .text-saffron-200 { color: #fef3c7; }
-.dark .bg-saffron-50 { background-color: rgba(254,243,199,0.1); }
-.dark .bg-saffron-100 { background-color: rgba(254,243,199,0.15); }
-.dark .bg-saffron-500 { background-color: #d97706; }
-.dark .bg-saffron-600 { background-color: #b45309; }
-.dark .border-saffron-100 { border-color: rgba(254,243,199,0.15); }
-.dark .border-saffron-200 { border-color: rgba(254,243,199,0.2); }
-.dark .from-saffron-50 { --tw-gradient-from: rgba(254,243,199,0.1); }
-.dark .from-amber-50 { --tw-gradient-from: rgba(254,243,199,0.1); }
-.dark .to-amber-50 { --tw-gradient-to: rgba(254,243,199,0.1); }
-.dark .from-green-50 { --tw-gradient-from: rgba(220,252,231,0.1); }
-.dark .from-red-50 { --tw-gradient-from: rgba(254,226,226,0.1); }
-.dark .from-yellow-50 { --tw-gradient-from: rgba(254,249,195,0.1); }
-.dark .bg-white\/80 { background-color: rgba(50,30,15,0.8); }
-.dark .bg-white\/50 { background-color: rgba(50,30,15,0.5); }
-.dark .bg-white\/30 { background-color: rgba(50,30,15,0.3); }
-.dark .bg-white\/70 { background-color: rgba(50,30,15,0.7); }
-.dark .from-amber-50 { --tw-gradient-from: rgba(254,243,199,0.08); }
-.dark .to-orange-50 { --tw-gradient-to: rgba(255,247,237,0.08); }
-.dark .from-saffron-100 { --tw-gradient-from: rgba(254,243,199,0.15); }
-.dark .to-amber-100 { --tw-gradient-to: rgba(254,243,199,0.15); }
-.dark .from-saffron-500 { --tw-gradient-from: #d97706; }
-.dark .to-saffron-600 { --tw-gradient-to: #b45309; }
-.dark .from-saffron-600 { --tw-gradient-from: #b45309; }
-.dark .to-saffron-700 { --tw-gradient-to: #92400e; }
-.dark .from-saffron-700 { --tw-gradient-from: #92400e; }
-.dark .to-saffron-800 { --tw-gradient-to: #78350f; }
-.dark .from-amber-100 { --tw-gradient-from: rgba(254,243,199,0.15); }
-.dark .to-amber-200 { --tw-gradient-to: rgba(253,230,138,0.15); }
-.dark .from-amber-200 { --tw-gradient-from: rgba(253,230,138,0.2); }
-.dark .to-amber-300 { --tw-gradient-to: rgba(252,211,77,0.2); }
-.dark .from-amber-400 { --tw-gradient-from: #f59e0b; }
-.dark .to-amber-500 { --tw-gradient-to: #d97706; }
-.dark .from-green-500 { --tw-gradient-from: #22c55e; }
-.dark .to-emerald-600 { --tw-gradient-to: #059669; }
-.dark .from-red-500 { --tw-gradient-from: #ef4444; }
-.dark .to-rose-600 { --tw-gradient-to: #e11d48; }
-.dark .from-yellow-500 { --tw-gradient-from: #eab308; }
-.dark .to-amber-600 { --tw-gradient-to: #d97706; }
-.dark input {
-  background-color: rgba(50,30,15,0.6);
-  border-color: rgba(254,243,199,0.2);
-  color: #fde8d0;
-}
-.dark input::placeholder {
-  color: rgba(254,243,199,0.4);
-}
-.dark details summary {
-  color: #f59e0b;
-}
-.dark .from-saffron-100 { --tw-gradient-from: rgba(254,243,199,0.12); }
-.dark .via-amber-50 { --tw-gradient-via: rgba(254,243,199,0.08); }
-.dark .to-saffron-100 { --tw-gradient-to: rgba(254,243,199,0.12); }

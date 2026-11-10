@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import { CalendarDays } from 'lucide-react';
 import DarkModeToggle from './DarkModeToggle';
 
 export default function Header() {
   return (
     <header className="relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-saffron-900 via-saffron-800 to-saffron-900" />
+      <div className="absolute inset-0 bg-linear-to-r from-[#3a1606] via-[#6b2a0c] to-[#3a1606]" />
 
       {/* Decorative pattern overlay */}
       <div className="absolute inset-0 opacity-10">
@@ -19,12 +20,18 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Left - Title */}
           <div className="flex items-center gap-4">
-            <div className="text-4xl sm:text-5xl animate-float">🙏</div>
+            <div
+              className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-serif text-saffron-900 shadow-lg ring-2 ring-amber-200/40"
+              style={{ background: 'radial-gradient(circle at 35% 30%, #fde68a, #e0a43a 60%, #b7791f)' }}
+              aria-hidden
+            >
+              ॐ
+            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-wide">
                 <Link href="/" className="hover:text-saffron-200 transition-colors">श्री राम प्रश्नावली</Link>
               </h1>
-              <p className="text-saffron-200 text-sm sm:text-base mt-1 tracking-widest">
+              <p className="text-amber-200/80 text-sm sm:text-base mt-1 tracking-widest">
                 Shri Ram Prashnavali
               </p>
             </div>
@@ -34,19 +41,17 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <Link
               href="/daily"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-saffron-700/50 text-saffron-200 rounded-sm text-xs font-medium hover:bg-saffron-600/50 transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 text-amber-100 ring-1 ring-white/15 rounded-full text-xs font-medium hover:bg-white/20 transition-colors"
             >
-              📅 आज की चौपाई
+              <CalendarDays size={14} /> आज की चौपाई
             </Link>
-            <span className="hidden sm:inline text-4xl sm:text-5xl text-saffron-200/60 font-serif">ॐ</span>
-            <DarkModeToggle />
+                        <DarkModeToggle />
           </div>
         </div>
       </div>
 
       {/* Bottom ornamental border */}
-      <div className="relative h-2 bg-gradient-to-r from-transparent via-gold-400 to-transparent" />
-      <div className="h-1 bg-gradient-to-r from-transparent via-saffron-600/50 to-transparent" />
+      <div className="relative h-[3px] bg-linear-to-r from-transparent via-amber-400/80 to-transparent" />
     </header>
   );
 }

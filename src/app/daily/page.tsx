@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import ChaupaiCard from '@/components/ChaupaiCard';
 import { CHAUPAIS } from '@/data/chaupais';
 import Link from 'next/link';
+import { BookOpen, GraduationCap, Landmark, Lightbulb, Link2, Sparkles } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/icons';
 
 function getDayOfYear(): number {
   const now = new Date();
@@ -40,10 +42,7 @@ export default function DailyPage() {
     } catch {}
   };
 
-  const resultType = dailyChaupai.result === 'शुभ' ? 'auspicious' : dailyChaupai.result === 'अशुभ' ? 'caution' : 'neutral';
-  const bgClass = resultType === 'auspicious' ? 'from-emerald-50 to-green-50' : resultType === 'caution' ? 'from-amber-50 to-orange-50' : 'from-indigo-50 to-blue-50';
-  const borderClass = resultType === 'auspicious' ? 'border-emerald-400' : resultType === 'caution' ? 'border-amber-400' : 'border-indigo-400';
-  const badgeClass = resultType === 'auspicious' ? 'bg-emerald-100 text-emerald-800' : resultType === 'caution' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
+  const tone = dailyChaupai.result === 'शुभ' ? 'tone-shubh' : dailyChaupai.result === 'अशुभ' ? 'tone-ashubh' : 'tone-prabhu';
 
   return (
     <div className="min-h-screen pattern-bg">
@@ -52,74 +51,73 @@ export default function DailyPage() {
       <main className="max-w-3xl mx-auto px-4 py-6 sm:py-10">
         {/* Day counter */}
         <div className="text-center mb-6 animate-fade-in">
-          <div className="inline-flex items-center gap-2 bg-saffron-100 px-4 py-2 rounded-sm">
-            <span className="text-saffron-600 text-sm font-medium">दिन #{dayOfYear}</span>
-            <span className="text-saffron-300">·</span>
-            <span className="text-saffron-700 text-sm">{dateStr}</span>
+          <div className="inline-flex items-center gap-2 bg-surface border border-line px-4 py-2 rounded-full">
+            <span className="text-ink-2 text-sm font-medium">दिन #{dayOfYear}</span>
+            <span className="text-gold">·</span>
+            <span className="text-ink-2 text-sm">{dateStr}</span>
           </div>
         </div>
 
         {/* Hero section */}
-        <div className={`card-premium rounded-md p-6 sm:p-8 mb-6 bg-gradient-to-br ${bgClass} border-l-4 ${borderClass} animate-fade-in`}>
-          <div className="text-center mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-saffron-800 mb-2">
-              🙏 आज की प्रश्नावली
+        <div className="card-premium rounded-xl overflow-hidden mb-6 animate-fade-in">
+          <div className={`${tone} text-white text-center px-6 py-6 sm:py-8`}>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+              आज की प्रश्नावली
             </h1>
-            <p className="text-saffron-600 text-sm">Today&apos;s Prashnavali</p>
-          </div>
-
-          {/* Badge */}
-          <div className="text-center mb-6">
-            <span className={`inline-block px-5 py-2 rounded-sm text-sm font-bold ${badgeClass}`}>
+            <p className="text-white/80 text-sm">Today&apos;s Prashnavali</p>
+            <span className="inline-block mt-4 px-4 py-1.5 rounded-full text-sm font-semibold bg-white/15 ring-1 ring-white/35">
               {dailyChaupai.resultLabel} · {dailyChaupai.resultLabelEn}
             </span>
           </div>
 
+          <div className="p-6 sm:p-8">
+
           {/* Chaupai */}
-          <div className="bg-white/60 backdrop-blur rounded-md p-6 mb-6">
-            <p className="text-xl sm:text-2xl text-saffron-900 leading-relaxed text-center font-serif">
+          <div className="bg-accent-soft border-l-4 border-accent rounded-lg p-6 mb-6">
+            <p className="text-xl sm:text-2xl text-verse font-semibold leading-loose text-center">
               {dailyChaupai.hindi}
             </p>
-            <p className="text-sm text-saffron-600 text-center mt-4 italic">
+            <p className="text-sm text-ink-2 text-center mt-4 italic">
               {dailyChaupai.meaning}
             </p>
           </div>
 
           {/* Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white/40 rounded-md p-4">
-              <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">📖 Episode</h3>
-              <p className="text-sm text-saffron-800">{dailyChaupai.episodeHi}</p>
-              <p className="text-xs text-saffron-500 mt-1">{dailyChaupai.episode}</p>
+            <div className="bg-surface-2 border border-line rounded-lg p-4">
+              <h3 className="text-[11px] text-ink-3 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1.5"><BookOpen size={13} /> Episode</h3>
+              <p className="text-sm text-ink">{dailyChaupai.episodeHi}</p>
+              <p className="text-xs text-ink-3 mt-1">{dailyChaupai.episode}</p>
             </div>
-            <div className="bg-white/40 rounded-md p-4">
-              <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">📚 Kand</h3>
-              <p className="text-sm text-saffron-800">{dailyChaupai.kandHi} ({dailyChaupai.kand})</p>
+            <div className="bg-surface-2 border border-line rounded-lg p-4">
+              <h3 className="text-[11px] text-ink-3 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1.5"><Landmark size={13} /> Kand</h3>
+              <p className="text-sm text-ink">{dailyChaupai.kandHi} ({dailyChaupai.kand})</p>
             </div>
-            <div className="bg-white/40 rounded-md p-4">
-              <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">🎓 Lesson</h3>
-              <p className="text-sm text-saffron-800">{dailyChaupai.lessonHi}</p>
+            <div className="bg-surface-2 border border-line rounded-lg p-4">
+              <h3 className="text-[11px] text-ink-3 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1.5"><GraduationCap size={13} /> Lesson</h3>
+              <p className="text-sm text-ink">{dailyChaupai.lessonHi}</p>
             </div>
-            <div className="bg-white/40 rounded-md p-4">
-              <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">💡 Inference</h3>
-              <p className="text-sm text-saffron-800">{dailyChaupai.inferenceHi}</p>
+            <div className="bg-surface-2 border border-line rounded-lg p-4">
+              <h3 className="text-[11px] text-ink-3 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1.5"><Lightbulb size={13} /> Guidance</h3>
+              <p className="text-sm text-ink">{dailyChaupai.inferenceHi}</p>
             </div>
+          </div>
           </div>
         </div>
 
         {/* CTA to do personal prashnavali */}
-        <div className="card-premium rounded-md p-6 text-center mb-6 animate-fade-in">
-          <h2 className="text-lg font-bold text-saffron-800 mb-2">
+        <div className="card-premium rounded-xl p-6 text-center mb-6 animate-fade-in">
+          <h2 className="text-lg font-bold text-ink mb-2">
             अपना प्रश्न पूछें
           </h2>
-          <p className="text-sm text-saffron-600 mb-4">
+          <p className="text-sm text-ink-2 mb-4">
             राम शलाका से अपने व्यक्तिगत प्रश्न का उत्तर पाएं
           </p>
           <Link
             href="/"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-saffron-600 to-saffron-700 text-white rounded-md font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-on-accent rounded-lg font-medium text-sm hover:bg-accent-hover shadow-md hover:shadow-lg transition-all duration-300"
           >
-            🔮 राम शलाका खोलें
+            <Sparkles size={16} /> राम शलाका खोलें
           </Link>
         </div>
 
@@ -127,23 +125,23 @@ export default function DailyPage() {
         <div className="flex items-center justify-center gap-3 animate-fade-in">
           <button
             onClick={handleWhatsAppShare}
-            className="px-5 py-2.5 bg-green-600 text-white rounded-md font-medium text-sm hover:bg-green-700 shadow-sm transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1f7a4d] text-white rounded-lg font-medium text-sm hover:bg-[#19663f] shadow-sm transition-all duration-300"
           >
-            WhatsApp पर शेयर करें
+            <WhatsAppIcon size={16} /> WhatsApp पर शेयर करें
           </button>
           <button
             onClick={handleCopyLink}
-            className="px-5 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-md font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface border border-line-strong text-ink-2 rounded-lg font-medium text-sm hover:bg-surface-2 hover:text-ink shadow-sm transition-all duration-300"
           >
-            📋 लिंक कॉपी करें
+            <Link2 size={16} /> लिंक कॉपी करें
           </button>
         </div>
 
         {/* Footer */}
         <footer className="text-center mt-12 py-6">
-          <div className="divider-traditional text-saffron-300 mb-3">◆</div>
-          <p className="text-saffron-600 text-sm">श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>
-          <p className="text-saffron-400 text-xs mt-1">Shri Ramcharitmanas · Goswami Tulsidas</p>
+          <div className="divider-traditional text-gold mb-3">◆</div>
+          <p className="text-ink-2 text-sm">श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>
+          <p className="text-ink-3 text-xs mt-1">Shri Ramcharitmanas · Goswami Tulsidas</p>
         </footer>
       </main>
     </div>

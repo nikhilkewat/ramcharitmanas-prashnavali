@@ -113,9 +113,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="hi"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
         <link rel="canonical" href={baseUrl} />
         <link rel="alternate" hrefLang="hi" href={baseUrl} />
         <link rel="alternate" hrefLang="en" href={`${baseUrl}?lang=en`} />
