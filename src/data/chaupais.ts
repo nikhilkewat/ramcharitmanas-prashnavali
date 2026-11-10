@@ -5,6 +5,7 @@ export interface Chaupai {
   hindi: string;
   transliteration: string;
   meaning: string;
+  meaningHi: string;
   result: ResultType;
   resultLabel: string;
   resultLabelEn: string;
@@ -27,6 +28,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'सुनु सिय सत्य असीस हमारी। पूजिहि मन कामना तुम्हारी॥',
     transliteration: 'Sunu Siya Satya Aseesis Hamari. Pujihi Man Kamana Tumhari.',
     meaning: "Listen, O Sita! My blessing is true. Your heart's desire will be fulfilled.",
+    meaningHi: 'हे सीता! मेरा आशीर्वाद सत्य है। आपके मन की इच्छा पूर्ण होगी।',
     result: 'शुभ',
     resultLabel: 'हाँ / पूर्ण सफलता',
     resultLabelEn: 'YES / SUCCESS',
@@ -47,6 +49,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'प्रबिसि नगर कीजे सब काजा। हृदयँ राखि कोसलपुर राजा॥',
     transliteration: 'Prabisi Nagar Kije Sab Kaja. Hridaya Rakhi Kosalpur Raja.',
     meaning: 'Enter the city and complete all tasks, keeping Lord Ram in your heart.',
+    meaningHi: 'नगर में प्रवेश कर सब कार्य करो, हृदय में कोसलपुर के राजा श्रीराम को रखो।',
     result: 'शुभ',
     resultLabel: 'हाँ / कार्य सिद्ध होगा',
     resultLabelEn: 'YES / SUCCESS',
@@ -67,6 +70,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'उघरहि अंत न होइ निबाहू। कालनेमि जिमि रावन राहू॥',
     transliteration: 'Ughrahin Ant Na Hoi Nibahu. Kalnemi Jimi Ravan Rahu.',
     meaning: 'Deceit is eventually exposed, just as Kalnemi, Ravana, and Rahu were destroyed.',
+    meaningHi: 'छल-कपट का अंत अवश्य होता है, जैसे कालनेमि, रावन और राहु का हुआ।',
     result: 'अशुभ',
     resultLabel: 'ना / सावधानी बरतें',
     resultLabelEn: 'NO / CAUTION',
@@ -87,6 +91,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'बिधि बस सुजन कुसंगत परहीं। फनि मनि सम निज गुन अनुसरहीं॥',
     transliteration: 'Bidhi Bas Sujan Kusangat Parahin. Phani Mani Sam Nij Gun Anusarahin.',
     meaning: 'Even good people fall into bad company by fate, but they should remain pure like a gem.',
+    meaningHi: 'विधि से सुजन भी बुरी संगति में पड़ते हैं, पर अपने गुणों में रत्न की तरह पवित्र रहें।',
     result: 'अशुभ',
     resultLabel: 'बुरा प्रभाव / सावधान',
     resultLabelEn: 'BAD INFLUENCE / CAUTION',
@@ -107,6 +112,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'होइहि सोइ जो राम रचि राखा। को करि तर्क बढ़ावै साखा॥',
     transliteration: 'Hoihi Soi Jo Ram Rachi Rakha. Ko Kari Tark Badhavai Sakha.',
     meaning: 'Whatever Lord Ram has planned will happen. Why argue and increase doubt?',
+    meaningHi: 'वही होगा जो श्रीराम ने रचा है। तर्क करके शंका क्यों बढ़ाओ?',
     result: 'प्रभु_इच्छा',
     resultLabel: 'ईश्वरीय इच्छा',
     resultLabelEn: "GOD'S WILL",
@@ -127,6 +133,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'मुद मंगलमय संत समाजू। जो जग जंगम तीरथ राजू॥',
     transliteration: 'Mud Mangalmay Sant Samaju. Jo Jag Jangam Teerthraju.',
     meaning: 'The society of saints is full of joy; it is a moving pilgrimage on earth.',
+    meaningHi: 'संतों का समाज मंगलमय है; यह पृथ्वी पर चलता-फिरता तीर्थ है।',
     result: 'शुभ',
     resultLabel: 'अत्यंत शुभ',
     resultLabelEn: 'HIGHLY AUSPICIOUS',
@@ -147,6 +154,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'गरल सुधा रिपु करहिं मिताई। गोपद सिंधु अनल सितलाई॥',
     transliteration: 'Garal Sudha Ripu Karahin Mitai. Gopad Sindhu Anal Sitlai.',
     meaning: 'Poison becomes nectar, enemies become friends, and fire becomes cool.',
+    meaningHi: 'विष अमृत बन जाता है, शत्रु मित्र बन जाते हैं, और अग्नि शीतल हो जाती है।',
     result: 'शुभ',
     resultLabel: 'चमत्कार / विजय',
     resultLabelEn: 'MIRACLE / VICTORY',
@@ -167,6 +175,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'बरुन कुबेर सुरेस समीरा। रन सन्मुख धरि काहूँ न धीरा॥',
     transliteration: 'Barun Kuber Sures Sameera. Ran Sanmukh Dhari Kahun Na Dhira.',
     meaning: 'Even Gods like Varuna and Kubera cannot stand firm in this battle.',
+    meaningHi: 'वरुण और कुबेर जैसे देवता भी इस युद्ध में डटकर खड़े नहीं रह सकते।',
     result: 'अशुभ',
     resultLabel: 'ना / कार्य में संदेह',
     resultLabelEn: 'NO / DOUBTFUL',
@@ -187,6 +196,7 @@ export const CHAUPAIS: Chaupai[] = [
     hindi: 'सुफल मनोरथ होहूँ तुम्हारे। रामु लखनु सुनि भए सुखारे॥',
     transliteration: 'Sufal Manorath Hohun Tumhare. Ramu Lakhanu Suni Bhaye Sukhare.',
     meaning: 'May your beautiful desires be fulfilled. Hearing this, Ram became happy.',
+    meaningHi: 'आपके मनोरथ सुफल हों। यह सुनकर श्रीराम प्रसन्न हो गए।',
     result: 'शुभ',
     resultLabel: 'मनोरथ पूर्ण होगा',
     resultLabelEn: 'WISH FULFILLED',

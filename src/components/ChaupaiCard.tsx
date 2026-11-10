@@ -59,7 +59,7 @@ export default function ChaupaiCard({
   return (
     <div
       className={`
-        card-result rounded-2xl overflow-hidden border-2 ${styles.accent}
+        card-result rounded-md overflow-hidden border-2 ${styles.accent}
         transition-all duration-700
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
       `}
@@ -72,7 +72,7 @@ export default function ChaupaiCard({
             <p className="text-white/80 text-xs mb-0.5">चयनित अक्षर · Selected</p>
             <span className="text-3xl font-bold">{selectedLetter}</span>
           </div>
-          <span className={`${styles.badge} inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold shadow-lg`}>
+          <span className={`${styles.badge} inline-flex items-center gap-1.5 px-4 py-2 rounded-sm text-sm font-bold shadow-lg`}>
             <span>{styles.icon}</span>
             {chaupai.resultLabelEn}
           </span>
@@ -98,7 +98,7 @@ export default function ChaupaiCard({
         </div>
 
         {/* Chaupai */}
-        <div className="bg-gradient-to-br from-saffron-50 to-amber-50 rounded-xl p-4 border border-saffron-100">
+        <div className="bg-linear-to-br from-saffron-50 to-amber-50 rounded-md p-4 border border-saffron-100">
           <p className="text-[10px] text-saffron-500 mb-1.5 tracking-wider uppercase font-medium">चौपाई · Chaupai</p>
           <p className="text-base sm:text-lg font-semibold text-saffron-900 leading-relaxed">{chaupai.hindi}</p>
           <p className="text-xs text-saffron-500 mt-1.5 italic">{chaupai.transliteration}</p>
@@ -107,17 +107,18 @@ export default function ChaupaiCard({
         {/* Meaning */}
         <div>
           <p className="text-[10px] text-saffron-500 mb-1.5 tracking-wider uppercase font-medium">अर्थ · Meaning</p>
-          <p className="text-sm text-saffron-800 leading-relaxed">{chaupai.meaning}</p>
+          <p className="text-sm text-saffron-800 leading-relaxed">{chaupai.meaningHi}</p>
+          <p className="text-xs text-saffron-500 mt-1 italic">{chaupai.meaning}</p>
         </div>
 
         {/* Kand & Context row */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-saffron-50/60 rounded-lg p-3 border border-saffron-100">
+          <div className="bg-saffron-50/60 rounded-md p-3 border border-saffron-100">
             <p className="text-[10px] text-saffron-500 mb-1 tracking-wider uppercase font-medium">काण्ड · Chapter</p>
             <p className="text-sm font-semibold text-saffron-800">{chaupai.kandHi}</p>
             <p className="text-xs text-saffron-500">{chaupai.kand} · {chaupai.kandNumber} of 7</p>
           </div>
-          <div className="bg-saffron-50/60 rounded-lg p-3 border border-saffron-100">
+          <div className="bg-saffron-50/60 rounded-md p-3 border border-saffron-100">
             <p className="text-[10px] text-saffron-500 mb-1 tracking-wider uppercase font-medium">प्रसंग · Context</p>
             <p className="text-sm font-semibold text-saffron-800">{chaupai.contextHi}</p>
             <p className="text-xs text-saffron-500">{chaupai.context}</p>
@@ -130,7 +131,7 @@ export default function ChaupaiCard({
             <span className="group-open:rotate-90 transition-transform">▶</span>
             कथा · Episode Story
           </summary>
-          <div className="mt-2 bg-saffron-50/40 rounded-lg p-3 border border-saffron-100/50">
+          <div className="mt-2 bg-saffron-50/40 rounded-md p-3 border border-saffron-100/50">
             <p className="text-xs text-saffron-700 leading-relaxed">{chaupai.episodeHi}</p>
             <p className="text-xs text-saffron-500 mt-1.5 italic">{chaupai.episode}</p>
           </div>
@@ -142,14 +143,14 @@ export default function ChaupaiCard({
             <span className="group-open:rotate-90 transition-transform">▶</span>
             शिक्षा · Life Lesson
           </summary>
-          <div className="mt-2 bg-saffron-50/40 rounded-lg p-3 border border-saffron-100/50">
+          <div className="mt-2 bg-saffron-50/40 rounded-md p-3 border border-saffron-100/50">
             <p className="text-xs text-saffron-700">{chaupai.lessonHi}</p>
             <p className="text-xs text-saffron-500 mt-1 italic">{chaupai.lesson}</p>
           </div>
         </details>
 
         {/* Inference */}
-        <div className="bg-gradient-to-r from-saffron-100 via-amber-50 to-saffron-100 rounded-xl p-4 border border-saffron-200/50">
+        <div className="bg-linear-to-r from-saffron-100 via-amber-50 to-saffron-100 rounded-md p-4 border border-saffron-200/50">
           <p className="text-[10px] text-saffron-500 mb-1 tracking-wider uppercase font-medium">निष्कर्ष · Guidance</p>
           <p className="text-sm font-semibold text-saffron-900">{chaupai.inference}</p>
           <p className="text-xs text-saffron-600 mt-0.5">{chaupai.inferenceHi}</p>

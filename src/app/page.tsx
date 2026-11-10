@@ -52,6 +52,8 @@ export default function Home() {
   const animationRef = useRef<NodeJS.Timeout | null>(null);
   const [isRandom, setIsRandom] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
 
   const animateReveal = useCallback((cells: number[], prashResult: PrashnavaliResult) => {
     setIsAnimating(true);
@@ -61,8 +63,9 @@ export default function Home() {
 
     const tick = () => {
       if (i < cells.length) {
-        setRevealedCells((prev) => [...prev, cells[i]]);
+        const cellIndex = cells[i];
         i++;
+        setRevealedCells((prev) => [...prev, cellIndex]);
         animationRef.current = setTimeout(tick, REVEAL_DELAY);
       } else {
         setIsAnimating(false);
@@ -139,6 +142,7 @@ export default function Home() {
     setQuestion('');
     setPendingQuestion('');
     setIsRandom(true);
+    setShowPanel(false);
     const randomPos = Math.floor(Math.random() * TOTAL_CELLS);
     const row = Math.floor(randomPos / GRID_SIZE);
     const col = randomPos % GRID_SIZE;
@@ -162,8 +166,6 @@ export default function Home() {
     window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
   };
-
-  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownloadImage = async () => {
     if (!result || isDownloading) return;
@@ -256,69 +258,29 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
     <div className="min-h-screen pattern-bg">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        {/* Question input */}
-        {!result && !isAnimating && (
-          <div className="max-w-xl mx-auto mb-6 animate-fade-in">
-            <div className="card-premium rounded-xl p-5">
-              <label className="block text-center mb-3">
-                <span className="text-sm font-medium text-saffron-700">
-                  अपना प्रश्न लिखें · Write your question
-                </span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={pendingQuestion}
-                  onChange={(e) => setPendingQuestion(e.target.value)}
-                  placeholder="जैसे: क्या मेरा कार्य सफल होगा?"
-                  className="w-full px-4 py-3 bg-white/80 border border-saffron-200 rounded-lg text-saffron-900 placeholder-saffron-400 focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent text-center text-sm"
-                />
-                {pendingQuestion && (
-                  <button
-                    onClick={() => setPendingQuestion('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-saffron-400 hover:text-saffron-600"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-              <p className="text-center text-xs text-saffron-500 mt-2">
-                वैकल्पिक · Optional — you can also skip and just click a letter
-              </p>
-              <div className="text-center mt-3">
-                <button
-                  onClick={handleRandomAsk}
-                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-full font-medium text-sm hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"
-                >
-                  🙏 मेरे लिए पूछें · Ask for Me
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Instruction bar */}
+      <main className=" mx-auto px-4 py-6 sm:py-8">
+        {/* Instruction bar - only before first selection */}
         {!result && !isAnimating && !showResult && (
-          <div className="card-premium rounded-xl p-4 sm:p-5 mb-6 animate-fade-in">
+          <div className="card-premium rounded-md p-4 sm:p-5 mb-6 animate-fade-in">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 text-sm text-saffron-700">
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-saffron-500 text-white rounded-full flex items-center justify-center text-xs font-bold">१</span>
+                <span className="w-6 h-6 bg-saffron-500 text-white rounded-sm flex items-center justify-center text-xs font-bold">१</span>
                 शांत मन से प्रश्न स्मरण करें
               </span>
               <span className="hidden sm:inline text-saffron-300">·</span>
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-saffron-500 text-white rounded-full flex items-center justify-center text-xs font-bold">२</span>
+                <span className="w-6 h-6 bg-saffron-500 text-white rounded-sm flex items-center justify-center text-xs font-bold">२</span>
                 ग्रिड में अक्षर चुनें
               </span>
               <span className="hidden sm:inline text-saffron-300">·</span>
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-saffron-500 text-white rounded-full flex items-center justify-center text-xs font-bold">३</span>
+                <span className="w-6 h-6 bg-saffron-500 text-white rounded-sm flex items-center justify-center text-xs font-bold">३</span>
                 चौपाई पढ़ें, उत्तर पाएं
               </span>
             </div>
           </div>
         )}
+
 
         {/* Main content: Grid + Result side by side */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
@@ -333,9 +295,9 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
             {/* Random Ask dramatic overlay */}
             {isRandom && !isAnimating && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-md z-10">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 border-4 border-saffron-300 border-t-saffron-700 rounded-full animate-spin" />
+                  <div className="w-16 h-16 border-4 border-saffron-300 border-t-saffron-700 rounded-sm animate-spin" />
                   <p className="text-white font-bold text-lg animate-pulse">🙏 भगवान से पूछ रहे हैं...</p>
                   <p className="text-saffron-200 text-xs">Asking the Lord...</p>
                 </div>
@@ -347,8 +309,8 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
               <div className="text-center py-4 animate-fade-in">
                 <div className="inline-flex flex-col items-center gap-2">
                   <div className="relative">
-                    <div className="w-8 h-8 border-2 border-saffron-200 rounded-full" />
-                    <div className="absolute top-0 left-0 w-8 h-8 border-2 border-saffron-600 rounded-full border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 border-2 border-saffron-200 rounded-sm" />
+                    <div className="absolute top-0 left-0 w-8 h-8 border-2 border-saffron-600 rounded-sm border-t-transparent animate-spin" />
                   </div>
                   <span className="text-saffron-700 font-medium text-xs">
                     {revealedCells.length} / 25
@@ -357,59 +319,13 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
               </div>
             )}
 
-            {/* Ask Again + Share buttons */}
-            {showResult && !isAnimating && (
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-4 animate-fade-in">
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2.5 bg-gradient-to-r from-saffron-600 to-saffron-700 text-white rounded-lg font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  पुनः प्रश्न करें
-                </button>
-                <button
-                  onClick={() => handleSpeak(result?.chaupai.hindi || '')}
-                  className={`px-4 py-2.5 border rounded-lg font-medium text-sm shadow-sm transition-all duration-300 ${
-                    isSpeaking
-                      ? 'bg-red-500 border-red-600 text-white'
-                      : 'bg-white border-saffron-200 text-saffron-700 hover:bg-saffron-50'
-                  }`}
-                >
-                  {isSpeaking ? '🔇 बंद करें' : '🔊 सुनें'}
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
-                >
-                  🖨️ प्रिंट
-                </button>
-                <button
-                  onClick={handleDownloadImage}
-                  disabled={isDownloading}
-                  className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300 disabled:opacity-50"
-                >
-                  {isDownloading ? '⏳ बना रहे हैं...' : '🖼️ फ़ोटो डाउनलोड'}
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
-                >
-                  {copied ? '✓ कॉपी हो गया!' : '📋 लिंक कॉपी'}
-                </button>
-                <button
-                  onClick={handleWhatsAppShare}
-                  className="px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700 shadow-sm transition-all duration-300"
-                >
-                  WhatsApp
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Right: Result */}
           {showResult && result && !isAnimating && (
-            <div ref={resultRef} className="lg:w-[55%] animate-slide-up">
+            <div ref={resultRef} className="lg:w-[50%] animate-slide-up">
               {question && (
-                <div className="card-premium rounded-xl p-4 mb-4 border-l-4 border-saffron-400">
+                <div className="card-premium rounded-md p-4 mb-4 border-l-4 border-saffron-400">
                   <p className="text-[10px] text-saffron-500 tracking-wider uppercase font-medium">Your Question</p>
                   <p className="text-sm font-medium text-saffron-800 mt-1">{question}</p>
                 </div>
@@ -422,8 +338,105 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
             </div>
           )}
 
+          {/* Right sidebar: Action icons (desktop) */}
+          {showResult && !isAnimating && (
+            <div className="hidden lg:flex flex-col items-start gap-2 lg:w-[8%] pt-4 animate-fade-in">
+              <button
+                onClick={handleReset}
+                className="group flex items-center justify-center w-10 h-10 bg-saffron-600 text-white rounded-sm text-lg hover:w-32 hover:justify-start hover:px-3 hover:gap-2 hover:bg-saffron-700 shadow-md transition-all duration-300 overflow-hidden whitespace-nowrap"
+              >
+                <span className="shrink-0 text-center leading-none">↻</span>
+                <span className="hidden group-hover:inline text-sm font-medium leading-none">पुनः प्रश्न</span>
+              </button>
+              <button
+                onClick={() => handleSpeak(result?.chaupai.hindi || '')}
+                className={`group flex items-center justify-center w-10 h-10 rounded-md text-lg shadow-sm transition-all duration-300 overflow-hidden whitespace-nowrap hover:w-32 hover:justify-start hover:px-3 hover:gap-2 ${
+                  isSpeaking ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white border border-saffron-200 text-saffron-700 hover:bg-saffron-50'
+                }`}
+              >
+                <span className="shrink-0 text-center leading-none">{isSpeaking ? '🔇' : '🔊'}</span>
+                <span className="hidden group-hover:inline text-sm font-medium leading-none">{isSpeaking ? 'बंद करें' : 'सुनें'}</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="group flex items-center justify-center w-10 h-10 bg-white border border-saffron-200 text-saffron-700 rounded-md text-lg hover:bg-saffron-50 shadow-sm transition-all duration-300 overflow-hidden whitespace-nowrap hover:w-32 hover:justify-start hover:px-3 hover:gap-2"
+              >
+                <span className="shrink-0 text-center leading-none">🖨️</span>
+                <span className="hidden group-hover:inline text-sm font-medium leading-none">प्रिंट</span>
+              </button>
+              <button
+                onClick={handleDownloadImage}
+                disabled={isDownloading}
+                className="group flex items-center justify-center w-10 h-10 bg-white border border-saffron-200 text-saffron-700 rounded-sm text-lg hover:bg-saffron-50 shadow-sm transition-all duration-300 overflow-hidden whitespace-nowrap hover:w-32 hover:justify-start hover:px-3 hover:gap-2 disabled:opacity-50"
+              >
+                <span className="shrink-0 text-center leading-none">{isDownloading ? '⏳' : '🖼️'}</span>
+                <span className="hidden group-hover:inline text-sm font-medium leading-none">डाउनलोड</span>
+              </button>
+              <button
+                onClick={handleShare}
+                className="group flex items-center justify-center w-10 h-10 bg-white border border-saffron-200 text-saffron-700 rounded-sm text-lg hover:bg-saffron-50 shadow-sm transition-all duration-300 overflow-hidden whitespace-nowrap hover:w-32 hover:justify-start hover:px-3 hover:gap-2"
+              >
+                <span className="shrink-0 text-center leading-none">{copied ? '✓' : '📋'}</span>
+                <span className="hidden group-hover:inline text-sm font-medium leading-none">{copied ? 'कॉपी हो गया!' : 'कॉपी'}</span>
+              </button>
+              <button
+                onClick={handleWhatsAppShare}
+                className="group flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-sm text-lg hover:bg-green-700 shadow-sm transition-all duration-300 overflow-hidden whitespace-nowrap hover:w-32 hover:justify-start hover:px-3 hover:gap-2"
+              >
+                <span className="shrink-0 text-center leading-none">💬</span>
+                <span className="hidden group-hover:inline text-sm font-medium leading-none">WhatsApp</span>
+              </button>
+            </div>
+          )}
+
 
         </div>
+
+        {/* Action buttons — mobile fallback (horizontal) */}
+        {showResult && !isAnimating && (
+          <div className="flex lg:hidden flex-wrap items-center justify-center gap-2 mt-6 animate-fade-in">
+            <button
+              onClick={handleReset}
+              className="px-4 py-2.5 bg-linear-to-r from-saffron-600 to-saffron-700 text-white rounded-md font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
+            >
+              पुनः प्रश्न करें
+            </button>
+            <button
+              onClick={() => handleSpeak(result?.chaupai.hindi || '')}
+              className={`px-4 py-2.5 border rounded-md font-medium text-sm shadow-sm transition-all duration-300 ${isSpeaking
+                  ? 'bg-red-500 border-red-600 text-white'
+                  : 'bg-white border-saffron-200 text-saffron-700 hover:bg-saffron-50'
+                }`}
+            >
+              {isSpeaking ? '🔇 बंद करें' : '🔊 सुनें'}
+            </button>
+            <button
+              onClick={handlePrint}
+              className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-md font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
+            >
+              🖨️ प्रिंट
+            </button>
+            <button
+              onClick={handleDownloadImage}
+              disabled={isDownloading}
+              className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-md font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300 disabled:opacity-50"
+            >
+              {isDownloading ? '⏳ बना रहे हैं...' : '🖼️ फ़ोटो डाउनलोड'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="px-4 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-md font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
+            >
+              {copied ? '✓ कॉपी हो गया!' : '📋 लिंक कॉपी'}
+            </button>
+            <button
+              onClick={handleWhatsAppShare}
+              className="px-4 py-2.5 bg-green-600 text-white rounded-md font-medium text-sm hover:bg-green-700 shadow-sm transition-all duration-300"
+            >
+              WhatsApp
+            </button>
+          </div>
+        )}
 
         {/* History */}
         {history.length > 0 && !result && !isAnimating && (
@@ -436,7 +449,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
               {history.slice(0, 6).map((item, index) => (
                 <div
                   key={index}
-                  className="card-premium rounded-lg p-4 cursor-pointer hover:shadow-md transition-all"
+                  className="card-premium rounded-md p-4 cursor-pointer hover:shadow-md transition-all"
                   onClick={() => {
                     const row = Math.floor(item.cell / 15);
                     const col = item.cell % 15;
@@ -465,6 +478,76 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
           <p className="text-saffron-400 text-xs mt-1">Shri Ramcharitmanas · Goswami Tulsidas</p>
         </footer>
       </main>
+
+      {/* FAB — Ask for Me */}
+      {!isAnimating && (
+        <button
+          onClick={() => setShowPanel(!showPanel)}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-linear-to-br from-orange-500 to-red-600 text-white rounded-sm shadow-lg hover:shadow-xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110"
+          aria-label="Ask for Me"
+        >
+          {showPanel ? '✕' : '🙏'}
+        </button>
+      )}
+
+      {/* Slide-up panel */}
+      {showPanel && (
+        <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/40 transition-opacity" />
+          {/* Panel */}
+          <div
+            className="absolute bottom-0 left-0 right-0 card-premium rounded-t-md p-6 animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="max-w-xl mx-auto">
+              <label className="block text-center mb-3">
+                <span className="text-sm font-medium text-saffron-700">
+                  {result ? 'नया प्रश्न लिखें · Ask a new question' : 'अपना प्रश्न लिखें · Write your question'}
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={pendingQuestion}
+                  onChange={(e) => setPendingQuestion(e.target.value)}
+                  placeholder="जैसे: क्या मेरा कार्य सफल होगा?"
+                  className="w-full px-4 py-3 bg-white/80 border border-saffron-200 rounded-md text-saffron-900 placeholder-saffron-400 focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent text-center text-sm"
+                />
+                {pendingQuestion && (
+                  <button
+                    onClick={() => setPendingQuestion('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-saffron-400 hover:text-saffron-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <p className="text-center text-xs text-saffron-500 mt-2 mb-4">
+                वैकल्पिक · Optional — you can also skip and just click a letter
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleRandomAsk}
+                  className="flex-1 px-6 py-3 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-md font-medium text-sm hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"
+                >
+                  🙏 मेरे लिए पूछें · Ask for Me
+                </button>
+                <button
+                  onClick={() => {
+                    if (pendingQuestion.trim()) {
+                      setShowPanel(false);
+                    }
+                  }}
+                  className="flex-1 px-6 py-3 bg-linear-to-r from-saffron-600 to-saffron-700 text-white rounded-md font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  ✨ प्रश्न दर्ज करें
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

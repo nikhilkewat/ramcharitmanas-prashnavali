@@ -22,7 +22,7 @@ export default function DarkModeToggle() {
   return (
     <button
       onClick={toggle}
-      className="w-9 h-9 flex items-center justify-center rounded-full bg-saffron-800/50 hover:bg-saffron-700/50 text-saffron-200 transition-colors"
+      className="w-9 h-9 flex items-center justify-center rounded-sm bg-saffron-800/50 hover:bg-saffron-700/50 text-saffron-200 transition-colors"
       title={dark ? 'Light mode' : 'Dark mode'}
     >
       {dark ? '☀️' : '🌙'}

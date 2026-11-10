@@ -52,7 +52,7 @@ export default function DailyPage() {
       <main className="max-w-3xl mx-auto px-4 py-6 sm:py-10">
         {/* Day counter */}
         <div className="text-center mb-6 animate-fade-in">
-          <div className="inline-flex items-center gap-2 bg-saffron-100 px-4 py-2 rounded-full">
+          <div className="inline-flex items-center gap-2 bg-saffron-100 px-4 py-2 rounded-sm">
             <span className="text-saffron-600 text-sm font-medium">दिन #{dayOfYear}</span>
             <span className="text-saffron-300">·</span>
             <span className="text-saffron-700 text-sm">{dateStr}</span>
@@ -60,7 +60,7 @@ export default function DailyPage() {
         </div>
 
         {/* Hero section */}
-        <div className={`card-premium rounded-2xl p-6 sm:p-8 mb-6 bg-gradient-to-br ${bgClass} border-l-4 ${borderClass} animate-fade-in`}>
+        <div className={`card-premium rounded-md p-6 sm:p-8 mb-6 bg-gradient-to-br ${bgClass} border-l-4 ${borderClass} animate-fade-in`}>
           <div className="text-center mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-saffron-800 mb-2">
               🙏 आज की प्रश्नावली
@@ -70,13 +70,13 @@ export default function DailyPage() {
 
           {/* Badge */}
           <div className="text-center mb-6">
-            <span className={`inline-block px-5 py-2 rounded-full text-sm font-bold ${badgeClass}`}>
+            <span className={`inline-block px-5 py-2 rounded-sm text-sm font-bold ${badgeClass}`}>
               {dailyChaupai.resultLabel} · {dailyChaupai.resultLabelEn}
             </span>
           </div>
 
           {/* Chaupai */}
-          <div className="bg-white/60 backdrop-blur rounded-xl p-6 mb-6">
+          <div className="bg-white/60 backdrop-blur rounded-md p-6 mb-6">
             <p className="text-xl sm:text-2xl text-saffron-900 leading-relaxed text-center font-serif">
               {dailyChaupai.hindi}
             </p>
@@ -87,20 +87,20 @@ export default function DailyPage() {
 
           {/* Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white/40 rounded-lg p-4">
+            <div className="bg-white/40 rounded-md p-4">
               <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">📖 Episode</h3>
               <p className="text-sm text-saffron-800">{dailyChaupai.episodeHi}</p>
               <p className="text-xs text-saffron-500 mt-1">{dailyChaupai.episode}</p>
             </div>
-            <div className="bg-white/40 rounded-lg p-4">
+            <div className="bg-white/40 rounded-md p-4">
               <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">📚 Kand</h3>
               <p className="text-sm text-saffron-800">{dailyChaupai.kandHi} ({dailyChaupai.kand})</p>
             </div>
-            <div className="bg-white/40 rounded-lg p-4">
+            <div className="bg-white/40 rounded-md p-4">
               <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">🎓 Lesson</h3>
               <p className="text-sm text-saffron-800">{dailyChaupai.lessonHi}</p>
             </div>
-            <div className="bg-white/40 rounded-lg p-4">
+            <div className="bg-white/40 rounded-md p-4">
               <h3 className="text-xs text-saffron-500 uppercase tracking-wider font-medium mb-1">💡 Inference</h3>
               <p className="text-sm text-saffron-800">{dailyChaupai.inferenceHi}</p>
             </div>
@@ -108,7 +108,7 @@ export default function DailyPage() {
         </div>
 
         {/* CTA to do personal prashnavali */}
-        <div className="card-premium rounded-xl p-6 text-center mb-6 animate-fade-in">
+        <div className="card-premium rounded-md p-6 text-center mb-6 animate-fade-in">
           <h2 className="text-lg font-bold text-saffron-800 mb-2">
             अपना प्रश्न पूछें
           </h2>
@@ -117,7 +117,7 @@ export default function DailyPage() {
           </p>
           <Link
             href="/"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-saffron-600 to-saffron-700 text-white rounded-lg font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-saffron-600 to-saffron-700 text-white rounded-md font-medium text-sm hover:from-saffron-700 hover:to-saffron-800 shadow-md hover:shadow-lg transition-all duration-300"
           >
             🔮 राम शलाका खोलें
           </Link>
@@ -127,13 +127,13 @@ export default function DailyPage() {
         <div className="flex items-center justify-center gap-3 animate-fade-in">
           <button
             onClick={handleWhatsAppShare}
-            className="px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700 shadow-sm transition-all duration-300"
+            className="px-5 py-2.5 bg-green-600 text-white rounded-md font-medium text-sm hover:bg-green-700 shadow-sm transition-all duration-300"
           >
             WhatsApp पर शेयर करें
           </button>
           <button
             onClick={handleCopyLink}
-            className="px-5 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-lg font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
+            className="px-5 py-2.5 bg-white border border-saffron-200 text-saffron-700 rounded-md font-medium text-sm hover:bg-saffron-50 shadow-sm transition-all duration-300"
           >
             📋 लिंक कॉपी करें
           </button>

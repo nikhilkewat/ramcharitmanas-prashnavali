@@ -59,7 +59,7 @@ export default function PrashnavaliGrid({
   };
 
   return (
-    <div className="card-premium rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+    <div className="card-premium rounded-md p-4 sm:p-5 relative overflow-hidden">
       <span className="absolute top-2 left-2 text-saffron-200/40 text-xl">❁</span>
       <span className="absolute top-2 right-2 text-saffron-200/40 text-xl">❁</span>
       <span className="absolute bottom-2 left-2 text-saffron-200/40 text-xl">❁</span>
@@ -72,16 +72,16 @@ export default function PrashnavaliGrid({
       <div className="overflow-x-auto">
         <div className="inline-block mx-auto">
           <div
-            className="grid gap-[2px] p-3 rounded-xl relative"
+            className="grid gap-0.5 p-3 rounded-md relative"
             role="grid"
             aria-label="Ram Shalaka grid of 225 Hindi letters"
             style={{
-              gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(1.6rem, 2rem))`,
+              gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(2.5rem, 3rem))`,
               background: 'linear-gradient(145deg, #78350f 0%, #92400e 30%, #78350f 70%, #451a03 100%)',
               boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(146, 64, 14, 0.25)',
             }}
           >
-            <div className="absolute inset-2 border border-amber-600/20 rounded-lg pointer-events-none" />
+            <div className="absolute inset-2 border border-amber-600/20 rounded-md pointer-events-none" />
 
             {GRID.map((row, rowIndex) =>
               row.map((letter, colIndex) => {
@@ -104,27 +104,27 @@ export default function PrashnavaliGrid({
                     role="gridcell"
                     aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}: ${letter}${selected ? ' (selected)' : ''}${revealed ? ' (revealed)' : ''}`}
                     className={`
-                      relative w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8
+                      relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12
                       flex items-center justify-center
-                      text-[10px] sm:text-xs md:text-sm font-medium
-                      rounded-[3px]
+                      text-sm sm:text-base md:text-lg font-medium
+                      rounded-sm
                       transition-all duration-150
                       focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-1
                       ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
                       ${
                         selected
-                          ? 'bg-gradient-to-b from-amber-400 to-amber-500 text-white scale-125 z-10 shadow-lg shadow-amber-500/40'
+                          ? 'bg-linear-to-b from-amber-400 to-amber-500 text-white scale-125 z-10 shadow-lg shadow-amber-500/40'
                           : revealed
-                          ? 'bg-gradient-to-b from-amber-200 to-amber-300 text-amber-900 shadow-sm animate-cell-glow'
+                          ? 'bg-linear-to-b from-amber-200 to-amber-300 text-amber-900 shadow-sm animate-cell-glow'
                           : hovered && !disabled
-                          ? 'bg-gradient-to-b from-amber-100 to-amber-200 text-amber-800 scale-110 z-10'
-                          : 'bg-gradient-to-b from-amber-50 to-orange-50 text-saffron-800 hover:from-amber-100 hover:to-amber-200'
+                          ? 'bg-linear-to-b from-amber-100 to-amber-200 text-amber-800 scale-110 z-10'
+                          : 'bg-linear-to-b from-amber-50 to-orange-50 text-saffron-800 hover:from-amber-100 hover:to-amber-200'
                       }
                     `}
                   >
                     <span className="leading-none select-none">{letter}</span>
                     {selected && (
-                      <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-gold-400 rounded-full border border-white shadow animate-cell-pulse" />
+                      <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-gold-400 rounded-sm border border-white shadow animate-cell-pulse" />
                     )}
                   </button>
                 );

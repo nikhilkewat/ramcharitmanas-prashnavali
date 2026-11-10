@@ -34,7 +34,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <Link
               href="/daily"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-saffron-700/50 text-saffron-200 rounded-full text-xs font-medium hover:bg-saffron-600/50 transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-saffron-700/50 text-saffron-200 rounded-sm text-xs font-medium hover:bg-saffron-600/50 transition-colors"
             >
               📅 आज की चौपाई
             </Link>
