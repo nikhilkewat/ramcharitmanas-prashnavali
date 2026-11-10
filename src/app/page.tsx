@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import PrashnavaliGrid from '@/components/PrashnavaliGrid';
 import ChaupaiCard from '@/components/ChaupaiCard';
+import SceneBackdrop, { nextSceneIndex } from '@/components/SceneBackdrop';
 import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali';
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
@@ -47,6 +48,7 @@ export default function Home() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
+  const [sceneIndex, setSceneIndex] = useState(0);
 
   // All inputs are passed explicitly so the timer callbacks never read stale state.
   const animateReveal = useCallback((prashResult: PrashnavaliResult, askedQuestion: string) => {
@@ -86,6 +88,7 @@ export default function Home() {
     setIsRandom(false);
     setQuestion(q);
     setPendingQuestion(q);
+    setSceneIndex(nextSceneIndex);
     const prashResult = generatePrashnavaliResult(row, col);
     animateReveal(prashResult, q);
 
@@ -312,10 +315,11 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   };
 
   return (
-    <div className="min-h-screen pattern-bg">
+    <div className="min-h-screen pattern-bg relative isolate">
+      <SceneBackdrop index={sceneIndex} />
       <Header />
 
-      <main className=" mx-auto px-4 py-6 sm:py-8">
+      <main className="mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Instruction bar - only before first selection */}
         {!result && !isAnimating && !showResult && (
           <div className="card-premium rounded-xl p-4 sm:p-5 mb-6 animate-fade-in">
@@ -342,7 +346,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
         {/* Main content: Grid + Result side by side */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Left: Grid */}
-          <div className={`${showResult ? 'lg:w-[45%] lg:min-w-fit' : 'w-full'} transition-all duration-500 relative`}>
+          <div className={`${showResult ? 'lg:w-[45%] lg:shrink-0' : 'w-full'} transition-all duration-500 relative`}>
             <PrashnavaliGrid
               onLetterSelect={handleLetterSelect}
               revealedCells={revealedCells}
