@@ -9,6 +9,7 @@ import ChaupaiCard from '@/components/ChaupaiCard';
 import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali';
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
+import { saveHistory, useHistory } from '@/lib/history';
 import { WhatsAppIcon } from '@/components/icons';
 import {
   CalendarDays, Check, HandHeart, ImageDown, Link2, Loader2, Printer,
@@ -16,24 +17,6 @@ import {
 } from 'lucide-react';
 
 const REVEAL_DELAY = 120;
-const HISTORY_KEY = 'ram-prashnavali-history';
-const MAX_HISTORY = 20;
-
-interface HistoryItem {
-  cell: number;
-  question: string;
-  chaupaiHindi: string;
-  chaupaiMeaning: string;
-  result: string;
-  timestamp: number;
-}
-
-function loadHistory(): HistoryItem[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch { return []; }
-}
 
 function escapeHtml(s: string): string {
   return s
@@ -42,13 +25,6 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function saveHistory(item: HistoryItem) {
-  const history = loadHistory();
-  history.unshift(item);
-  if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
 
 export default function Home() {
@@ -61,10 +37,12 @@ export default function Home() {
   const [revealedCells, setRevealedCells] = useState<number[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const history = useHistory();
 
   const resultRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
+  // Pending start of a reading ("Ask for Me" delay, shared-link autoplay).
+  const startRef = useRef<NodeJS.Timeout | null>(null);
   const [isRandom, setIsRandom] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -97,7 +75,6 @@ export default function Home() {
           result: prashResult.chaupai.resultLabelEn,
           timestamp: Date.now(),
         });
-        setHistory(loadHistory());
       }
     };
 
@@ -126,6 +103,7 @@ export default function Home() {
 
   const handleReset = () => {
     if (animationRef.current) clearTimeout(animationRef.current);
+    if (startRef.current) clearTimeout(startRef.current);
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setResult(null);
@@ -170,7 +148,9 @@ export default function Home() {
     const randomPos = Math.floor(Math.random() * TOTAL_CELLS);
     const row = Math.floor(randomPos / GRID_SIZE);
     const col = randomPos % GRID_SIZE;
-    setTimeout(() => {
+    if (startRef.current) clearTimeout(startRef.current);
+    startRef.current = setTimeout(() => {
+      startRef.current = null;
       runPrashna(row, col, '');
     }, 1500);
   };
@@ -258,7 +238,6 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
   // Load from URL on mount
   useEffect(() => {
-    setHistory(loadHistory());
     const params = new URLSearchParams(window.location.search);
     const cellParam = params.get('cell');
     const qParam = params.get('q');
@@ -267,9 +246,18 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
       if (!isNaN(cellIndex) && cellIndex >= 0 && cellIndex < 225) {
         const row = Math.floor(cellIndex / 15);
         const col = cellIndex % 15;
-        setTimeout(() => runPrashna(row, col, qParam ?? ''), 300);
+        startRef.current = setTimeout(() => {
+          startRef.current = null;
+          runPrashna(row, col, qParam ?? '');
+        }, 300);
       }
     }
+    // Stop pending timers and speech when leaving the page.
+    return () => {
+      if (startRef.current) clearTimeout(startRef.current);
+      if (animationRef.current) clearTimeout(animationRef.current);
+      window.speechSynthesis?.cancel();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
