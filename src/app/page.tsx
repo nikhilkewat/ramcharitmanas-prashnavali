@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -11,6 +11,7 @@ import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali'
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
 import { saveHistory, useHistory } from '@/lib/history';
+import { isSpeechSupported, speakChaupai } from '@/lib/speech';
 import { WhatsAppIcon } from '@/components/icons';
 import {
   CalendarDays, Check, ImageDown, Link2, Loader2, Printer,
@@ -18,6 +19,8 @@ import {
 } from 'lucide-react';
 
 const REVEAL_DELAY = 120;
+
+const noopSubscribe = () => () => {};
 
 function escapeHtml(s: string): string {
   return s
@@ -46,6 +49,10 @@ export default function Home() {
   const startRef = useRef<NodeJS.Timeout | null>(null);
   const [isRandom, setIsRandom] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [noVoice, setNoVoice] = useState(false);
+  // Bumped on every start/stop so a late async voice load can't restart speech.
+  const speechRun = useRef(0);
+  const canSpeak = useSyncExternalStore(noopSubscribe, isSpeechSupported, () => false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   // All inputs are passed explicitly so the timer callbacks never read stale state.
@@ -104,7 +111,8 @@ export default function Home() {
   const handleReset = () => {
     if (animationRef.current) clearTimeout(animationRef.current);
     if (startRef.current) clearTimeout(startRef.current);
-    window.speechSynthesis.cancel();
+    speechRun.current++;
+    window.speechSynthesis?.cancel();
     setIsSpeaking(false);
     setResult(null);
     setRevealedCells([]);
@@ -153,20 +161,28 @@ export default function Home() {
     }, 1500);
   };
 
-  const handleSpeak = (text: string) => {
+  const handleSpeak = async () => {
+    const run = ++speechRun.current;
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'hi-IN';
-    utterance.rate = 0.8;
-    utterance.pitch = 1;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
+    if (!result) return;
     setIsSpeaking(true);
+    const ok = await speakChaupai({
+      hindi: result.chaupai.hindi,
+      transliteration: result.chaupai.transliteration,
+      onEnd: () => {
+        if (speechRun.current === run) setIsSpeaking(false);
+      },
+      isCancelled: () => speechRun.current !== run,
+    });
+    if (!ok && speechRun.current === run) {
+      setIsSpeaking(false);
+      setNoVoice(true);
+      setTimeout(() => setNoVoice(false), 2500);
+    }
   };
 
   const handleDownloadImage = async () => {
@@ -278,10 +294,13 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
   const actions: Action[] = result ? [
     { key: 'reset', label: 'पुनः प्रश्न', Icon: RotateCcw, variant: 'primary' },
-    {
-      key: 'speak', label: isSpeaking ? 'बंद करें' : 'सुनें', Icon: isSpeaking ? VolumeX : Volume2,
+    ...(canSpeak ? [{
+      key: 'speak',
+      label: noVoice ? 'आवाज़ उपलब्ध नहीं' : isSpeaking ? 'बंद करें' : 'सुनें',
+      Icon: isSpeaking || noVoice ? VolumeX : Volume2,
       variant: isSpeaking ? 'active' : 'neutral',
-    },
+      disabled: noVoice,
+    } satisfies Action] : []),
     { key: 'print', label: 'प्रिंट', Icon: Printer, variant: 'neutral' },
     {
       key: 'image', label: isDownloading ? 'बना रहे हैं...' : 'फ़ोटो डाउनलोड', Icon: isDownloading ? Loader2 : ImageDown,
@@ -294,7 +313,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   const handleAction = (key: string) => {
     switch (key) {
       case 'reset': return handleReset();
-      case 'speak': return handleSpeak(result?.chaupai.hindi || '');
+      case 'speak': return handleSpeak();
       case 'print': return handlePrint();
       case 'image': return handleDownloadImage();
       case 'copy': return handleShare();
