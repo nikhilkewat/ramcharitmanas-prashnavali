@@ -56,27 +56,27 @@ export default function PrashnavaliGrid({
   };
 
   return (
-    <div className="card-premium rounded-xl p-4 sm:p-5 relative overflow-hidden">
-      <span className="absolute top-2 left-2 text-gold/30 text-xl">❁</span>
-      <span className="absolute top-2 right-2 text-gold/30 text-xl">❁</span>
-      <span className="absolute bottom-2 left-2 text-gold/30 text-xl">❁</span>
-      <span className="absolute bottom-2 right-2 text-gold/30 text-xl">❁</span>
+    <div className="card-premium rounded-xl p-2 sm:p-5 relative overflow-hidden">
+      <span className="hidden sm:block absolute top-2 left-2 text-gold/30 text-xl" aria-hidden>❁</span>
+      <span className="hidden sm:block absolute top-2 right-2 text-gold/30 text-xl" aria-hidden>❁</span>
+      <span className="hidden sm:block absolute bottom-2 left-2 text-gold/30 text-xl" aria-hidden>❁</span>
+      <span className="hidden sm:block absolute bottom-2 right-2 text-gold/30 text-xl" aria-hidden>❁</span>
 
-      <div className="text-center mb-4">
+      <div className="text-center mt-1 mb-2 sm:mt-0 sm:mb-4">
         <p className="text-xs text-ink-2 tracking-widest uppercase font-medium">राम शलाका · Ram Shalaka</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="w-fit mx-auto">
+      {/* Fluid board: 15 equal square columns that always fit the available
+          width (no horizontal scroll on phones), capped on large screens.
+          Letter size follows the board width via container query units. */}
+      <div className="@container w-full max-w-[46rem] mx-auto">
           <div
-            className="shalaka-board grid gap-1 p-3 rounded-lg relative"
+            className="shalaka-board grid gap-[2px] sm:gap-1 p-1.5 sm:p-3 rounded-lg relative"
             role="grid"
             aria-label="Ram Shalaka grid of 225 Hindi letters"
-            style={{
-              gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(2.5rem, 3rem))`,
-            }}
+            style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
           >
-            <div className="absolute inset-2 border border-gold/20 rounded-lg pointer-events-none" />
+            <div className="hidden sm:block absolute inset-2 border border-gold/20 rounded-lg pointer-events-none" />
 
             {GRID.map((row, rowIndex) =>
               row.map((letter, colIndex) => {
@@ -95,10 +95,10 @@ export default function PrashnavaliGrid({
                     role="gridcell"
                     aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}: ${letter}${selected ? ' (selected)' : ''}${revealed ? ' (revealed)' : ''}`}
                     className={`
-                      relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12
+                      relative aspect-square min-w-0
                       flex items-center justify-center
-                      text-sm sm:text-base md:text-lg font-medium
-                      rounded-md
+                      text-[clamp(0.7rem,3.3cqi,1.15rem)] font-medium
+                      rounded-[3px] sm:rounded-md
                       transition-all duration-150
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-1 focus-visible:ring-offset-transparent
                       ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
@@ -113,19 +113,19 @@ export default function PrashnavaliGrid({
                   >
                     <span className="leading-none select-none">{letter}</span>
                     {selected && (
-                      <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-gold rounded-full border border-surface shadow animate-cell-pulse" />
+                      <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-gold rounded-full border border-surface shadow animate-cell-pulse" />
                     )}
                   </button>
                 );
               })
             )}
           </div>
-        </div>
       </div>
 
-      <div className="text-center mt-4">
+      <div className="text-center mt-2 mb-1 sm:mt-4 sm:mb-0">
         <p className="text-[11px] text-ink-3 tracking-wide">
-          ✦ किसी भी अक्षर पर क्लिक करें · Click any letter · Arrow keys to navigate ✦
+          <span className="sm:hidden">✦ किसी भी अक्षर को छुएँ · Tap any letter ✦</span>
+          <span className="hidden sm:inline">✦ किसी भी अक्षर पर क्लिक करें · Click any letter · Arrow keys to navigate ✦</span>
         </p>
       </div>
     </div>
