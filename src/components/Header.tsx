@@ -23,7 +23,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <BrandMark size={56} className="shrink-0 drop-shadow-lg w-12 h-12 sm:w-14 sm:h-14" />
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-wide">
+              <h1 className="font-display text-[1.7rem] sm:text-4xl md:text-[2.6rem] leading-tight text-white">
                 <Link href="/" className="hover:text-saffron-200 transition-colors">श्री राम प्रश्नावली</Link>
               </h1>
               <p className="text-amber-200/80 text-sm sm:text-base mt-1 tracking-widest">

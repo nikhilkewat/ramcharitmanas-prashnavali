@@ -1,15 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Mukta, Tiro_Devanagari_Hindi } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// UI text: clean humanist face covering both Devanagari and Latin.
+const mukta = Mukta({
+  variable: "--font-mukta",
+  subsets: ["devanagari", "latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Scripture text (chaupai, grid letters, titles): calligraphic Devanagari,
+// the same face the brand ॐ is drawn from. Single weight — never bold it.
+const tiro = Tiro_Devanagari_Hindi({
+  variable: "--font-tiro",
+  subsets: ["devanagari"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 export const viewport: Viewport = {
@@ -107,7 +113,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="hi"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${mukta.variable} ${tiro.variable} h-full antialiased`}
     >
       <head>
         <script

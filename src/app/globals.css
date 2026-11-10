@@ -116,8 +116,8 @@
   --color-saffron-900: #451a03;
   --color-gold-400: #facc15;
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-mukta), system-ui, sans-serif;
+  --font-display: var(--font-tiro), var(--font-mukta), serif;
 }
 
 * {
@@ -131,7 +131,7 @@ html {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), Georgia, 'Times New Roman', serif;
+  font-family: var(--font-sans);
   min-height: 100vh;
 }
 
@@ -257,6 +257,12 @@ body {
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* Tiro ships one weight; never let the browser fake a bold. */
+.font-display {
+  font-weight: 400;
+  font-synthesis-weight: none;
+}
 
 /* Card surfaces */
 .card-premium,
