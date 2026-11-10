@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CalendarDays } from 'lucide-react';
+import BrandMark from './BrandMark';
 import DarkModeToggle from './DarkModeToggle';
 
 export default function Header() {
@@ -20,13 +21,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Left - Title */}
           <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-serif text-saffron-900 shadow-lg ring-2 ring-amber-200/40"
-              style={{ background: 'radial-gradient(circle at 35% 30%, #fde68a, #e0a43a 60%, #b7791f)' }}
-              aria-hidden
-            >
-              ॐ
-            </div>
+            <BrandMark size={56} className="shrink-0 drop-shadow-lg w-12 h-12 sm:w-14 sm:h-14" />
             <div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-wide">
                 <Link href="/" className="hover:text-saffron-200 transition-colors">श्री राम प्रश्नावली</Link>
