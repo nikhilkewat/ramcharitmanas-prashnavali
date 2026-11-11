@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { CalendarDays } from 'lucide-react';
 import BrandMark from './BrandMark';
 import DarkModeToggle from './DarkModeToggle';
+import HistoryMenu from './HistoryMenu';
 
 export default function Header() {
   return (
@@ -33,14 +34,15 @@ export default function Header() {
           </div>
 
           {/* Right - Nav + OM + Dark Mode */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/daily"
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 text-amber-100 ring-1 ring-white/15 rounded-full text-xs font-medium hover:bg-white/20 transition-colors"
             >
               <CalendarDays size={14} /> आज की चौपाई
             </Link>
-                        <DarkModeToggle />
+            <HistoryMenu />
+            <DarkModeToggle />
           </div>
         </div>
       </div>

@@ -56,6 +56,25 @@ export function useHistory(): HistoryItem[] {
   return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY);
 }
 
+export function clearHistory() {
+  try {
+    localStorage.removeItem(HISTORY_KEY);
+  } catch {
+    return;
+  }
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+/** Fired by the history drawer when a past reading is picked on the home page. */
+export const OPEN_READING_EVENT = 'ram-prashnavali-open-reading';
+export type OpenReadingDetail = { cell: number; question: string };
+
+export function readingHref({ cell, question }: OpenReadingDetail): string {
+  const params = new URLSearchParams({ cell: String(cell) });
+  if (question) params.set('q', question);
+  return '/?' + params.toString();
+}
+
 const sameReading = (a: HistoryItem, b: HistoryItem) =>
   a.cell === b.cell && (a.question ?? '').trim() === (b.question ?? '').trim();
 
