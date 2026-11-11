@@ -29,7 +29,7 @@ export default function DarkModeToggle() {
     <button
       onClick={toggle}
       className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/20 text-amber-100 transition-colors"
-      title={dark ? 'Light mode' : 'Dark mode'}
+      title={dark ? 'लाइट मोड · Light mode' : 'डार्क मोड · Dark mode'}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {dark ? <Sun size={18} /> : <Moon size={18} />}

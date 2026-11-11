@@ -29,6 +29,7 @@ export default function QuestionBox({ value, onChange, onAskForMe, disabled }: Q
       type="button"
       onClick={onAskForMe}
       disabled={disabled}
+      title="Ask for me — a letter is picked for you"
       className="h-11 inline-flex items-center justify-center gap-2 px-4 tone-prabhu text-white rounded-lg font-medium text-sm hover:brightness-110 shadow-sm transition-all disabled:opacity-60 whitespace-nowrap"
     >
       <Sparkles size={16} /> मेरे लिए पूछें
@@ -85,6 +86,7 @@ export default function QuestionBox({ value, onChange, onAskForMe, disabled }: Q
               type="button"
               onClick={() => setOpen(true)}
               disabled={disabled}
+              title="Write your question (optional)"
               className="h-11 inline-flex items-center justify-center gap-2 px-4 bg-surface border border-line-strong text-ink-2 rounded-lg font-medium text-sm hover:bg-surface-2 hover:text-ink transition-colors disabled:opacity-60 whitespace-nowrap"
             >
               <PenLine size={16} /> प्रश्न लिखें
