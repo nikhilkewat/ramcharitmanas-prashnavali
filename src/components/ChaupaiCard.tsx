@@ -49,7 +49,7 @@ export default function ChaupaiCard({
         <div className="relative z-10 flex items-center justify-between gap-3">
           <div>
             <p className="text-white/75 text-xs mb-0.5">चयनित अक्षर · Selected</p>
-            <span className="text-3xl font-bold">{selectedLetter}</span>
+            <span className="font-display text-4xl leading-none">{selectedLetter}</span>
           </div>
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-semibold bg-white/15 ring-1 ring-white/35 backdrop-blur-sm">
             <styles.Icon size={16} aria-hidden />
@@ -67,7 +67,7 @@ export default function ChaupaiCard({
             {letterSequence.map((letter, index) => (
               <span
                 key={index}
-                className="animate-reveal-letter inline-flex items-center justify-center min-w-7 h-7 px-1 bg-surface-2 border border-line rounded-md text-xs font-medium text-ink-2"
+                className="animate-reveal-letter inline-flex items-center justify-center min-w-7 h-7 px-1 bg-surface-2 border border-line rounded-md font-display text-sm text-ink-2"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 {letter}
@@ -79,7 +79,7 @@ export default function ChaupaiCard({
         {/* Chaupai */}
         <div className="bg-accent-soft rounded-lg px-5 py-4 border-l-4 border-accent">
           <p className={`${LABEL} flex items-center gap-1.5`}><ScrollText size={13} /> चौपाई · Chaupai</p>
-          <p className="text-lg sm:text-xl font-semibold text-verse leading-loose">{chaupai.hindi}</p>
+          <p className="font-display text-xl sm:text-2xl text-verse leading-relaxed">{chaupai.hindi}</p>
           <p className="text-xs text-ink-3 mt-1 italic">{chaupai.transliteration}</p>
         </div>
 

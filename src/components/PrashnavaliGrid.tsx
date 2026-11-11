@@ -97,16 +97,16 @@ export default function PrashnavaliGrid({
                     className={`
                       relative aspect-square min-w-0
                       flex items-center justify-center
-                      text-[clamp(0.7rem,3.3cqi,1.15rem)] font-medium
+                      font-display text-[clamp(0.72rem,3.5cqi,1.3rem)] leading-none
                       rounded-[3px] sm:rounded-md
                       transition-all duration-150
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-1 focus-visible:ring-offset-transparent
                       ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
                       ${
                         selected
-                          ? 'cell-selected font-bold scale-125 z-10'
+                          ? 'cell-selected scale-125 z-10'
                           : revealed
-                          ? 'cell-revealed font-semibold animate-cell-glow'
+                          ? 'cell-revealed animate-cell-glow'
                           : `cell ${disabled ? 'opacity-75' : 'hover:scale-110 hover:z-10'}`
                       }
                     `}

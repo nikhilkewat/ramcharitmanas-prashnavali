@@ -1,23 +1,26 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import PrashnavaliGrid from '@/components/PrashnavaliGrid';
 import ChaupaiCard from '@/components/ChaupaiCard';
-import SceneBackdrop, { nextSceneIndex } from '@/components/SceneBackdrop';
+import QuestionBox from '@/components/QuestionBox';
 import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali';
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
 import { saveHistory, useHistory } from '@/lib/history';
+import { isSpeechSupported, speakChaupai } from '@/lib/speech';
 import { WhatsAppIcon } from '@/components/icons';
 import {
-  CalendarDays, Check, HandHeart, ImageDown, Link2, Loader2, Printer,
-  RotateCcw, Send, Sparkles, Volume2, VolumeX, X, type LucideIcon,
+  CalendarDays, Check, ImageDown, Link2, Loader2, Printer,
+  RotateCcw, Volume2, VolumeX, type LucideIcon,
 } from 'lucide-react';
 
 const REVEAL_DELAY = 120;
+
+const noopSubscribe = () => () => {};
 
 function escapeHtml(s: string): string {
   return s
@@ -46,9 +49,11 @@ export default function Home() {
   const startRef = useRef<NodeJS.Timeout | null>(null);
   const [isRandom, setIsRandom] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [noVoice, setNoVoice] = useState(false);
+  // Bumped on every start/stop so a late async voice load can't restart speech.
+  const speechRun = useRef(0);
+  const canSpeak = useSyncExternalStore(noopSubscribe, isSpeechSupported, () => false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [showPanel, setShowPanel] = useState(false);
-  const [sceneIndex, setSceneIndex] = useState(0);
 
   // All inputs are passed explicitly so the timer callbacks never read stale state.
   const animateReveal = useCallback((prashResult: PrashnavaliResult, askedQuestion: string) => {
@@ -88,7 +93,6 @@ export default function Home() {
     setIsRandom(false);
     setQuestion(q);
     setPendingQuestion(q);
-    setSceneIndex(nextSceneIndex);
     const prashResult = generatePrashnavaliResult(row, col);
     animateReveal(prashResult, q);
 
@@ -107,7 +111,8 @@ export default function Home() {
   const handleReset = () => {
     if (animationRef.current) clearTimeout(animationRef.current);
     if (startRef.current) clearTimeout(startRef.current);
-    window.speechSynthesis.cancel();
+    speechRun.current++;
+    window.speechSynthesis?.cancel();
     setIsSpeaking(false);
     setResult(null);
     setRevealedCells([]);
@@ -143,35 +148,41 @@ export default function Home() {
   };
 
   const handleRandomAsk = () => {
-    if (isAnimating) return;
-    setQuestion('');
-    setPendingQuestion('');
+    if (isAnimating || isRandom) return;
+    const q = pendingQuestion;
     setIsRandom(true);
-    setShowPanel(false);
     const randomPos = Math.floor(Math.random() * TOTAL_CELLS);
     const row = Math.floor(randomPos / GRID_SIZE);
     const col = randomPos % GRID_SIZE;
     if (startRef.current) clearTimeout(startRef.current);
     startRef.current = setTimeout(() => {
       startRef.current = null;
-      runPrashna(row, col, '');
+      runPrashna(row, col, q);
     }, 1500);
   };
 
-  const handleSpeak = (text: string) => {
+  const handleSpeak = async () => {
+    const run = ++speechRun.current;
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'hi-IN';
-    utterance.rate = 0.8;
-    utterance.pitch = 1;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
+    if (!result) return;
     setIsSpeaking(true);
+    const ok = await speakChaupai({
+      hindi: result.chaupai.hindi,
+      transliteration: result.chaupai.transliteration,
+      onEnd: () => {
+        if (speechRun.current === run) setIsSpeaking(false);
+      },
+      isCancelled: () => speechRun.current !== run,
+    });
+    if (!ok && speechRun.current === run) {
+      setIsSpeaking(false);
+      setNoVoice(true);
+      setTimeout(() => setNoVoice(false), 2500);
+    }
   };
 
   const handleDownloadImage = async () => {
@@ -283,10 +294,13 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
 
   const actions: Action[] = result ? [
     { key: 'reset', label: 'पुनः प्रश्न', Icon: RotateCcw, variant: 'primary' },
-    {
-      key: 'speak', label: isSpeaking ? 'बंद करें' : 'सुनें', Icon: isSpeaking ? VolumeX : Volume2,
+    ...(canSpeak ? [{
+      key: 'speak',
+      label: noVoice ? 'आवाज़ उपलब्ध नहीं' : isSpeaking ? 'बंद करें' : 'सुनें',
+      Icon: isSpeaking || noVoice ? VolumeX : Volume2,
       variant: isSpeaking ? 'active' : 'neutral',
-    },
+      disabled: noVoice,
+    } satisfies Action] : []),
     { key: 'print', label: 'प्रिंट', Icon: Printer, variant: 'neutral' },
     {
       key: 'image', label: isDownloading ? 'बना रहे हैं...' : 'फ़ोटो डाउनलोड', Icon: isDownloading ? Loader2 : ImageDown,
@@ -299,7 +313,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   const handleAction = (key: string) => {
     switch (key) {
       case 'reset': return handleReset();
-      case 'speak': return handleSpeak(result?.chaupai.hindi || '');
+      case 'speak': return handleSpeak();
       case 'print': return handlePrint();
       case 'image': return handleDownloadImage();
       case 'copy': return handleShare();
@@ -315,33 +329,19 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   };
 
   return (
-    <div className="min-h-screen pattern-bg relative isolate">
-      <SceneBackdrop index={sceneIndex} />
+    <div className="min-h-screen pattern-bg">
       <Header />
 
       <main className="mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        {/* Instruction bar - only before first selection */}
+        {/* Question — only before a reading */}
         {!result && !isAnimating && !showResult && (
-          <div className="card-premium rounded-xl p-4 sm:p-5 mb-6 animate-fade-in">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 text-sm text-ink-2">
-              <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-accent text-on-accent rounded-full flex items-center justify-center text-xs font-bold">१</span>
-                शांत मन से प्रश्न स्मरण करें
-              </span>
-              <span className="hidden sm:inline text-gold">·</span>
-              <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-accent text-on-accent rounded-full flex items-center justify-center text-xs font-bold">२</span>
-                ग्रिड में अक्षर चुनें
-              </span>
-              <span className="hidden sm:inline text-gold">·</span>
-              <span className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-accent text-on-accent rounded-full flex items-center justify-center text-xs font-bold">३</span>
-                चौपाई पढ़ें, उत्तर पाएं
-              </span>
-            </div>
-          </div>
+          <QuestionBox
+            value={pendingQuestion}
+            onChange={setPendingQuestion}
+            onAskForMe={handleRandomAsk}
+            disabled={isRandom}
+          />
         )}
-
 
         {/* Main content: Grid + Result side by side */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
@@ -482,76 +482,6 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
         </footer>
       </main>
 
-      {/* FAB — Ask for Me */}
-      {!isAnimating && (
-        <button
-          onClick={() => setShowPanel(!showPanel)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-accent text-on-accent rounded-full ring-4 ring-accent-soft shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
-          aria-label="Ask for Me"
-        >
-          {showPanel ? <X size={24} /> : <HandHeart size={26} />}
-        </button>
-      )}
-
-      {/* Slide-up panel */}
-      {showPanel && (
-        <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)}>
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity" />
-          {/* Panel */}
-          <div
-            className="absolute bottom-0 left-0 right-0 card-premium rounded-t-2xl p-6 animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="max-w-xl mx-auto">
-              <label className="block text-center mb-3">
-                <span className="text-sm font-medium text-ink-2">
-                  {result ? 'नया प्रश्न लिखें · Ask a new question' : 'अपना प्रश्न लिखें · Write your question'}
-                </span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={pendingQuestion}
-                  onChange={(e) => setPendingQuestion(e.target.value)}
-                  placeholder="जैसे: क्या मेरा कार्य सफल होगा?"
-                  className="w-full px-4 py-3 bg-surface-2 border border-line-strong rounded-lg text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-center text-sm"
-                />
-                {pendingQuestion && (
-                  <button
-                    onClick={() => setPendingQuestion('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink"
-                    aria-label="Clear question"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-              <p className="text-center text-xs text-ink-3 mt-2 mb-4">
-                वैकल्पिक · Optional — you can also skip and just click a letter
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={handleRandomAsk}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 tone-prabhu text-white rounded-lg font-medium text-sm hover:brightness-110 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Sparkles size={16} /> मेरे लिए पूछें · Ask for Me
-                </button>
-                <button
-                  onClick={() => {
-                    if (pendingQuestion.trim()) {
-                      setShowPanel(false);
-                    }
-                  }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-on-accent rounded-lg font-medium text-sm hover:bg-accent-hover shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  <Send size={16} /> प्रश्न दर्ज करें
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

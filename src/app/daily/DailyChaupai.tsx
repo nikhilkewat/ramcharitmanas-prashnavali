@@ -71,7 +71,7 @@ export default function DailyChaupai() {
       {/* Hero section */}
       <div className="card-premium rounded-xl overflow-hidden mb-6 animate-fade-in">
         <div className={`${tone} text-white text-center px-6 py-6 sm:py-8`}>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">आज की प्रश्नावली</h1>
+          <h1 className="font-display text-3xl sm:text-4xl mb-2">आज की प्रश्नावली</h1>
           <p className="text-white/80 text-sm">Today&apos;s Prashnavali</p>
           <span className="inline-block mt-4 px-4 py-1.5 rounded-full text-sm font-semibold bg-white/15 ring-1 ring-white/35">
             {dailyChaupai.resultLabel} · {dailyChaupai.resultLabelEn}
@@ -81,7 +81,7 @@ export default function DailyChaupai() {
         <div className="p-6 sm:p-8">
           {/* Chaupai */}
           <div className="bg-accent-soft border-l-4 border-accent rounded-lg p-6 mb-6">
-            <p className="text-xl sm:text-2xl text-verse font-semibold leading-loose text-center">
+            <p className="font-display text-2xl sm:text-3xl text-verse leading-relaxed text-center">
               {dailyChaupai.hindi}
             </p>
             <p className="text-sm text-ink-2 text-center mt-4 italic">{dailyChaupai.meaning}</p>
