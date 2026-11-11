@@ -10,7 +10,7 @@ import QuestionBox from '@/components/QuestionBox';
 import { generatePrashnavaliResult, PrashnavaliResult } from '@/lib/prashnavali';
 import { generateResultImage, downloadImage } from '@/lib/generateImage';
 import { GRID_SIZE, TOTAL_CELLS } from '@/data/grid';
-import { saveHistory, useHistory } from '@/lib/history';
+import { OPEN_READING_EVENT, saveHistory, type OpenReadingDetail } from '@/lib/history';
 import { isSpeechSupported, speakChaupai } from '@/lib/speech';
 import { WhatsAppIcon } from '@/components/icons';
 import {
@@ -41,7 +41,6 @@ export default function Home() {
   const [revealedCells, setRevealedCells] = useState<number[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [copied, setCopied] = useState(false);
-  const history = useHistory();
 
   const resultRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<NodeJS.Timeout | null>(null);
@@ -276,6 +275,21 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   }, []);
 
   useEffect(() => {
+    const onOpenReading = (e: Event) => {
+      const { cell, question: q } = (e as CustomEvent<OpenReadingDetail>).detail;
+      if (startRef.current) clearTimeout(startRef.current);
+      speechRun.current++;
+      window.speechSynthesis?.cancel();
+      setIsSpeaking(false);
+      setResult(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      runPrashna(Math.floor(cell / GRID_SIZE), cell % GRID_SIZE, q);
+    };
+    window.addEventListener(OPEN_READING_EVENT, onOpenReading);
+    return () => window.removeEventListener(OPEN_READING_EVENT, onOpenReading);
+  }, [runPrashna]);
+
+  useEffect(() => {
     if (showResult && resultRef.current) {
       setTimeout(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -436,36 +450,6 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
                 {label}
               </button>
             ))}
-          </div>
-        )}
-
-        {/* History */}
-        {history.length > 0 && !result && !isAnimating && (
-          <div className="mt-12 animate-fade-in">
-            <div className="divider-traditional text-ink-3 mb-4">।।</div>
-            <h3 className="text-lg font-bold text-ink text-center mb-4">
-              पिछले प्रश्न · Past Queries
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {history.slice(0, 6).map((item, index) => (
-                <div
-                  key={index}
-                  className="card-premium rounded-xl p-4 cursor-pointer hover:border-line-strong hover:-translate-y-0.5 transition-all"
-                  onClick={() => {
-                    if (isAnimating) return;
-                    const row = Math.floor(item.cell / GRID_SIZE);
-                    const col = item.cell % GRID_SIZE;
-                    runPrashna(row, col, item.question || '');
-                  }}
-                >
-                  {item.question && (
-                    <p className="text-xs text-ink-3 mb-1 truncate">{item.question}</p>
-                  )}
-                  <p className="text-sm font-medium text-ink truncate">{item.chaupaiHindi}</p>
-                  <p className="text-[11px] text-ink-3 mt-1">{item.result} · {new Date(item.timestamp).toLocaleDateString('hi-IN')}</p>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
