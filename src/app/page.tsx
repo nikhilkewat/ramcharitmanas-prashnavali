@@ -300,6 +300,8 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   type Action = {
     key: string;
     label: string;
+    /** English hint, shown as tooltip / screen-reader text. */
+    en: string;
     Icon: LucideIcon | typeof WhatsAppIcon;
     variant: 'primary' | 'neutral' | 'active' | 'whatsapp';
     disabled?: boolean;
@@ -307,21 +309,22 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
   };
 
   const actions: Action[] = result ? [
-    { key: 'reset', label: 'पुनः प्रश्न', Icon: RotateCcw, variant: 'primary' },
+    { key: 'reset', label: 'पुनः प्रश्न', en: 'Ask again', Icon: RotateCcw, variant: 'primary' },
     ...(canSpeak ? [{
       key: 'speak',
+      en: noVoice ? 'No voice available on this device' : isSpeaking ? 'Stop' : 'Listen',
       label: noVoice ? 'आवाज़ उपलब्ध नहीं' : isSpeaking ? 'बंद करें' : 'सुनें',
       Icon: isSpeaking || noVoice ? VolumeX : Volume2,
       variant: isSpeaking ? 'active' : 'neutral',
       disabled: noVoice,
     } satisfies Action] : []),
-    { key: 'print', label: 'प्रिंट', Icon: Printer, variant: 'neutral' },
+    { key: 'print', label: 'प्रिंट', en: 'Print', Icon: Printer, variant: 'neutral' },
     {
-      key: 'image', label: isDownloading ? 'बना रहे हैं...' : 'फ़ोटो डाउनलोड', Icon: isDownloading ? Loader2 : ImageDown,
+      key: 'image', label: isDownloading ? 'बना रहे हैं...' : 'फ़ोटो डाउनलोड', en: 'Download as image', Icon: isDownloading ? Loader2 : ImageDown,
       variant: 'neutral', disabled: isDownloading, spin: isDownloading,
     },
-    { key: 'copy', label: copied ? 'कॉपी हो गया!' : 'लिंक कॉपी', Icon: copied ? Check : Link2, variant: 'neutral' },
-    { key: 'whatsapp', label: 'WhatsApp', Icon: WhatsAppIcon, variant: 'whatsapp' },
+    { key: 'copy', label: copied ? 'कॉपी हो गया!' : 'लिंक कॉपी', en: copied ? 'Copied!' : 'Copy link', Icon: copied ? Check : Link2, variant: 'neutral' },
+    { key: 'whatsapp', label: 'WhatsApp', en: 'Share on WhatsApp', Icon: WhatsAppIcon, variant: 'whatsapp' },
   ] : [];
 
   const handleAction = (key: string) => {
@@ -398,7 +401,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
             <div ref={resultRef} className="lg:flex-1 min-w-0 animate-slide-up">
               {question && (
                 <div className="card-premium rounded-xl p-4 mb-4 border-l-4 border-accent">
-                  <p className="text-[11px] text-ink-3 tracking-wider uppercase font-medium">Your Question</p>
+                  <p className="text-[11px] text-ink-3 tracking-wider uppercase font-medium">आपका प्रश्न · Your question</p>
                   <p className="text-sm font-medium text-ink mt-1">{question}</p>
                 </div>
               )}
@@ -415,12 +418,12 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
             // Fixed-size buttons in a fixed-width column; the label floats as a
             // tooltip so hovering or changing a label never reflows the layout.
             <div className="hidden lg:flex flex-col gap-2 w-10 shrink-0 pt-4 animate-fade-in">
-              {actions.map(({ key, label, Icon, variant, disabled, spin }) => (
+              {actions.map(({ key, label, en, Icon, variant, disabled, spin }) => (
                 <button
                   key={key}
                   onClick={() => handleAction(key)}
                   disabled={disabled}
-                  aria-label={label}
+                  aria-label={`${label} · ${en}`}
                   className={`group relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 disabled:opacity-60 ${variantClass[variant]}`}
                 >
                   <Icon size={18} className={spin ? 'animate-spin' : ''} />
@@ -429,6 +432,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
                     className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-ink text-surface px-2.5 py-1.5 text-xs font-medium shadow-lg opacity-0 translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0"
                   >
                     {label}
+                    {label !== en && <span className="ml-1.5 opacity-70">{en}</span>}
                   </span>
                 </button>
               ))}
@@ -439,11 +443,13 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
         {/* Action buttons — mobile (horizontal) */}
         {showResult && !isAnimating && (
           <div className="flex lg:hidden flex-wrap items-center justify-center gap-2 mt-6 animate-fade-in">
-            {actions.map(({ key, label, Icon, variant, disabled, spin }) => (
+            {actions.map(({ key, label, en, Icon, variant, disabled, spin }) => (
               <button
                 key={key}
                 onClick={() => handleAction(key)}
                 disabled={disabled}
+                title={en}
+                aria-label={`${label} · ${en}`}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 disabled:opacity-60 ${variantClass[variant]}`}
               >
                 <Icon size={16} className={spin ? 'animate-spin' : ''} />
@@ -458,7 +464,7 @@ ${question ? `<p style="text-align:center;font-size:13px;color:#6b4e17;margin:16
           <div className="divider-traditional text-gold mb-3">◆</div>
           <p className="text-ink-2 text-sm">
             <Link href="/daily" className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:text-accent transition-colors">
-              <CalendarDays size={16} /> आज की प्रश्नावली देखें
+              <CalendarDays size={16} /> आज की चौपाई देखें
             </Link>
           </p>
           <p className="text-ink-2 text-sm mt-2">श्रीरामचरितमानस · गोस्वामी तुलसीदास</p>

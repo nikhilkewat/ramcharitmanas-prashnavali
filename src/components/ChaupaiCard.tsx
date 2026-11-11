@@ -47,13 +47,16 @@ export default function ChaupaiCard({
       <div className={`${styles.tone} px-5 py-4 text-white relative overflow-hidden`}>
         <span className="absolute -top-2 right-3 text-6xl text-white/10 font-serif select-none" aria-hidden>ॐ</span>
         <div className="relative z-10 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-white/75 text-xs mb-0.5">चयनित अक्षर · Selected</p>
+          <div className="shrink-0" title="Selected letter">
+            <p className="text-white/75 text-xs mb-0.5 whitespace-nowrap">चयनित अक्षर</p>
             <span className="font-display text-4xl leading-none">{selectedLetter}</span>
           </div>
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-semibold bg-white/15 ring-1 ring-white/35 backdrop-blur-sm">
-            <styles.Icon size={16} aria-hidden />
-            {chaupai.resultLabelEn}
+          <span className="min-w-0 inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/15 ring-1 ring-white/35 backdrop-blur-sm">
+            <styles.Icon size={18} className="shrink-0" aria-hidden />
+            <span className="flex flex-col leading-tight">
+              <span className="text-sm sm:text-[15px] font-semibold">{chaupai.resultLabel}</span>
+              <span className="text-[11px] text-white/80 tracking-wide">{chaupai.resultLabelEn}</span>
+            </span>
           </span>
         </div>
       </div>
@@ -62,7 +65,7 @@ export default function ChaupaiCard({
       <div className="p-5 space-y-5">
         {/* Letter Sequence */}
         <div>
-          <p className={LABEL}>अक्षर माला</p>
+          <p className={LABEL}>अक्षर माला · Letters</p>
           <div className="flex flex-wrap gap-1">
             {letterSequence.map((letter, index) => (
               <span

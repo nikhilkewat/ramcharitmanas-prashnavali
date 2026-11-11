@@ -87,7 +87,7 @@ export default function HistoryMenu() {
                   ref={closeRef}
                   type="button"
                   onClick={close}
-                  aria-label="Close"
+                  aria-label="बंद करें · Close"
                   className="p-2 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-2"
                 >
                   <X size={18} />
@@ -150,9 +150,10 @@ export default function HistoryMenu() {
                       <button
                         type="button"
                         onClick={() => setConfirmClear(true)}
+                        title="Clear history"
                         className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm text-ink-3 hover:text-ink hover:bg-surface-2"
                       >
-                        <Trash2 size={15} /> इतिहास मिटाएं · Clear history
+                        <Trash2 size={15} /> इतिहास मिटाएं
                       </button>
                     )}
                   </div>

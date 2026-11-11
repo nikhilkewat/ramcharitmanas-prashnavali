@@ -71,8 +71,8 @@ export default function DailyChaupai() {
       {/* Hero section */}
       <div className="card-premium rounded-xl overflow-hidden mb-6 animate-fade-in">
         <div className={`${tone} text-white text-center px-6 py-6 sm:py-8`}>
-          <h1 className="font-display text-3xl sm:text-4xl mb-2">आज की प्रश्नावली</h1>
-          <p className="text-white/80 text-sm">Today&apos;s Prashnavali</p>
+          <h1 className="font-display text-3xl sm:text-4xl mb-2">आज की चौपाई</h1>
+          <p className="text-white/80 text-sm">Today&apos;s Chaupai</p>
           <span className="inline-block mt-4 px-4 py-1.5 rounded-full text-sm font-semibold bg-white/15 ring-1 ring-white/35">
             {dailyChaupai.resultLabel} · {dailyChaupai.resultLabelEn}
           </span>
@@ -89,17 +89,18 @@ export default function DailyChaupai() {
 
           {/* Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Detail Icon={BookOpen} label="Episode" value={dailyChaupai.episodeHi} sub={dailyChaupai.episode} />
-            <Detail Icon={Landmark} label="Kand" value={`${dailyChaupai.kandHi} (${dailyChaupai.kand})`} />
-            <Detail Icon={GraduationCap} label="Lesson" value={dailyChaupai.lessonHi} />
-            <Detail Icon={Lightbulb} label="Guidance" value={dailyChaupai.inferenceHi} />
+            <Detail Icon={BookOpen} label="कथा · Episode" value={dailyChaupai.episodeHi} sub={dailyChaupai.episode} />
+            <Detail Icon={Landmark} label="काण्ड · Chapter" value={`${dailyChaupai.kandHi} (${dailyChaupai.kand})`} />
+            <Detail Icon={GraduationCap} label="शिक्षा · Lesson" value={dailyChaupai.lessonHi} />
+            <Detail Icon={Lightbulb} label="निष्कर्ष · Guidance" value={dailyChaupai.inferenceHi} />
           </div>
         </div>
       </div>
 
       {/* CTA to do personal prashnavali */}
       <div className="card-premium rounded-xl p-6 text-center mb-6 animate-fade-in">
-        <h2 className="text-lg font-bold text-ink mb-2">अपना प्रश्न पूछें</h2>
+        <h2 className="font-display text-2xl text-ink mb-1">अपना प्रश्न पूछें</h2>
+        <p className="text-xs text-ink-3 mb-2">Ask your own question</p>
         <p className="text-sm text-ink-2 mb-4">राम शलाका से अपने व्यक्तिगत प्रश्न का उत्तर पाएं</p>
         <Link
           href="/"
